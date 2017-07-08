@@ -19,7 +19,15 @@ var Enemy = function() {
 //Enemy needs to run these functions at startup, am i right in not including them
 //in Enemy.prototype?
 var randomEnemyXStartValue = function() {
-  return 150;
+
+  let startInColumn1 = 0, startInColumn2 = 101, startInColumn3 = 202,
+  startInColumn4 = 303, startInColumn5 = 404;
+  let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
+  startInColumn3, startInColumn4, startInColumn5];
+  let randomStartColumn = Math.floor(Math.random() * 5);
+  let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
+
+  return randomHorizontalStartPosition;
 }
 
 var randomEnemyYStartValue = function() {
