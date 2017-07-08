@@ -9,22 +9,22 @@ var Enemy = function() {
   let obj = Object.create(Enemy.prototype);
   obj.x = randomEnemyXStartValue();
   obj.y = randomEnemyYStartValue();
+  obj.speed = randomEnemySpeedValue();
   obj.sprite = 'images/enemy-bug.png';
 
   return obj;
 };
 
-//QUESTION: Is it better to encapsulate these randomizer functions inside the
-//constructor function with "let"? Or does this provide more readability/clarity? Since every
-//Enemy needs to run these functions at startup, am i right in not including them
-//in Enemy.prototype?
+//QUESTION: Since every enemy needs to run the randomizer functions at startup, am i
+//right in not including them in Enemy.prototype?
 var randomEnemyXStartValue = function() {
 
   let startInColumn1 = 0, startInColumn2 = 101, startInColumn3 = 202,
-  startInColumn4 = 303, startInColumn5 = 404;
+  startInColumn4 = 303, startInColumn5 = 404, startInColumn6 = 505,
+  startInColumn7 = 606;
   let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
-  startInColumn3, startInColumn4, startInColumn5];
-  let randomStartColumn = Math.floor(Math.random() * 5);
+  startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7];
+  let randomStartColumn = Math.floor(Math.random() * 7);
   let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
 
   return randomHorizontalStartPosition;
@@ -41,6 +41,9 @@ var randomEnemyYStartValue = function() {
   return randomVerticalStartPosition;
 }
 
+var randomEnemySpeedValue = function() {
+  return 200 + Math.random() * 500;
+}
 
 
 // Update the enemy's position, required method for game
@@ -49,6 +52,20 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+    let startPosition = -150;
+    let highestHorizontalPositionBeforeReset = 505 + Math.random() * 300;
+    let currentHorizontalPosition = this.x;
+
+    if(currentHorizontalPosition > highestHorizontalPositionBeforeReset) {
+
+      this.x = startPosition;
+      this.y = randomEnemyYStartValue();
+      this.speed = randomEnemySpeedValue();
+    } else {
+
+      this.x += this.speed * dt;
+    }
+
 };
 
 // Draw the enemy on the screen, required method for game
