@@ -24,14 +24,15 @@ var randomEnemyXStartValue = function() {
 
 var randomEnemyYStartValue = function() {
 
-  let upper = 59, middle = 142, lower = 225;
+  let startInUpperRow = 59, startInMiddleRow = 142, startInLowerRow = 225;
+  let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
+    startInLowerRow];
+  let randomStartRow = Math.floor(Math.random() * 3);
+  let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
 
-  let verticalEnemySpots = [upper, middle, lower];
-
-
-  // debugger;
-  return 225;
+  return randomVerticalStartPosition;
 }
+
 
 
 // Update the enemy's position, required method for game
@@ -40,11 +41,6 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    // var obj = this;
-    // Enemy.x = 10;
-    // debugger;
-    // obj.Enemy.x = x + 10;
-    // this.x = x + 10;
 };
 
 // Draw the enemy on the screen, required method for game
@@ -89,19 +85,18 @@ Player.prototype.handleInput = function() {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-
+var player = new Player();
 var numberOfEnemies = 5;
 var allEnemies = enemyFactory(numberOfEnemies);
-var player = new Player();
 
 function enemyFactory(numberOfEnemies) {
 
-  let enemies = [];
+  let enemyContainer = [];
   for(let i = 0; i < numberOfEnemies; i++) {
-    enemies.push(new Enemy);
+    enemyContainer.push(new Enemy);
   }
-  debugger;
-  return enemies;
+
+  return enemyContainer;
 };
 
 // This listens for key presses and sends the keys to your
