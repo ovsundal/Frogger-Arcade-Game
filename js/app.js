@@ -1,3 +1,8 @@
+var gameAdjustmentVariables = {
+
+  numberOfEnemies: 8
+};
+
 // Enemies our player must avoid
 var Enemy = function() {
   // Variables applied to each of our instances go here,
@@ -119,6 +124,9 @@ Player.prototype.handleInput = function(keyInput) {
   let maxAllowedMovementNorth = 155;
   let maxAllowedMovementSouth = 405;
 
+  let currentHorizontalPosition = this.x;
+  let currentVerticalPosition = this.y;
+
   switch (keyInput) {
     case ("left"):
       {
@@ -160,7 +168,8 @@ Player.prototype.handleInput = function(keyInput) {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var player = new Player();
-var numberOfEnemies = 5;
+debugger;
+var numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 var allEnemies = enemyFactory(numberOfEnemies);
 
 function enemyFactory(numberOfEnemies) {
@@ -173,8 +182,6 @@ function enemyFactory(numberOfEnemies) {
   return enemyContainer;
 };
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
   var allowedKeys = {
     37: 'left',
