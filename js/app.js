@@ -1,6 +1,7 @@
 var gameAdjustmentVariables = {
 
-  numberOfEnemies: 8
+  numberOfEnemies: 7,
+  enemySpeed: 450
 };
 
 // Enemies our player must avoid
@@ -55,7 +56,7 @@ var randomEnemyYStartValue = function() {
 }
 
 var randomEnemySpeedValue = function() {
-  return 200 + Math.random() * 500;
+  return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
 }
 
 
@@ -98,18 +99,21 @@ var Player = function() {
 
   // The image/sprite for our enemies, this uses
   // a helper we've provided to easily load images
-  let obj = Object.create(Player.prototype);
-  obj.sprite = 'images/char-boy.png';
-  obj.x = playerFixedHorizontalStartPosition;
-  obj.y = playerFixedVerticalStartPosition;
+  let playerObject = Object.create(Player.prototype);
+  playerObject.sprite = 'images/char-boy.png';
+  playerObject.x = playerFixedHorizontalStartPosition;
+  playerObject.y = playerFixedVerticalStartPosition;
 
-  return obj;
+  return playerObject;
 };
 
 Player.prototype.update = function() {
   // You should multiply any movement by the dt parameter
   // which will ensure the game runs at the same speed for
   // all computers.
+
+  //QUESTION: What is the point of this update? Player moves instantaneously?
+  //The way the engine is implemented it does not pass a dt parameter to player, only enemy
 };
 
 Player.prototype.render = function() {
@@ -119,10 +123,11 @@ Player.prototype.render = function() {
 Player.prototype.handleInput = function(keyInput) {
   //QUESTION: Would it make more sense to store the maxAllowedValues somewhere else
   //so i dont have to declare them every time?
-  let maxAllowedMovementWest = 101;
+  let minAllowedMovementWest = 101;
   let maxAllowedMovementEast = 305;
-  let maxAllowedMovementNorth = 155;
+  let minAllowedMovementNorth = 72;
   let maxAllowedMovementSouth = 405;
+
 
   let currentHorizontalPosition = this.x;
   let currentVerticalPosition = this.y;
@@ -130,7 +135,7 @@ Player.prototype.handleInput = function(keyInput) {
   switch (keyInput) {
     case ("left"):
       {
-        if (currentHorizontalPosition > maxAllowedMovementWest) {
+        if (currentHorizontalPosition > minAllowedMovementWest) {
           this.x -= 101;
         }
         break;
@@ -143,10 +148,12 @@ Player.prototype.handleInput = function(keyInput) {
       }
     case ("up"):
       {
-        if (currentVerticalPosition > maxAllowedMovementNorth) {
+        if (currentVerticalPosition > minAllowedMovementNorth) {
           this.y -= 83;
         }
-        //trigger win condition here?
+        if (playerIsInWinningPosition(this.y)) {
+          playerHasWon();
+        }
         break;
       }
     case ("down"):
@@ -164,11 +171,24 @@ Player.prototype.handleInput = function(keyInput) {
   }
 }
 
+var playerIsInWinningPosition = function(currentVerticalPosition) {
+  let winConditionPlayerReachesWater = 72;
+
+  if (currentVerticalPosition < winConditionPlayerReachesWater) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+var playerHasWon = function() {
+console.log("hurray");
+}
+
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var player = new Player();
-debugger;
 var numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 var allEnemies = enemyFactory(numberOfEnemies);
 
