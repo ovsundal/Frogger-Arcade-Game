@@ -112,27 +112,47 @@ Player.prototype.render = function() {
 };
 
 Player.prototype.handleInput = function(keyInput) {
+  //QUESTION: Would it make more sense to store the maxAllowedValues somewhere else
+  //so i dont have to declare them every time?
+  let maxAllowedMovementWest = 101;
+  let maxAllowedMovementEast = 305;
+  let maxAllowedMovementNorth = 155;
+  let maxAllowedMovementSouth = 405;
+
   switch (keyInput) {
     case ("left"):
       {
-        this.x -= 101;
+        if (currentHorizontalPosition > maxAllowedMovementWest) {
+          this.x -= 101;
+        }
         break;
       }
     case ("right"):
       {
-        this.x += 101;
+        if (currentHorizontalPosition < maxAllowedMovementEast)
+          this.x += 101;
         break;
       }
-      case ("up"):
-        {
+    case ("up"):
+      {
+        if (currentVerticalPosition > maxAllowedMovementNorth) {
           this.y -= 83;
-          break;
         }
-        case ("down"):
-          {
-            this.y += 83;
-            break;
-          }
+        //trigger win condition here?
+        break;
+      }
+    case ("down"):
+      {
+        if (currentVerticalPosition < maxAllowedMovementSouth) {
+          this.y += 83;
+        }
+        break;
+      }
+    default:
+      {
+        break;
+      }
+
   }
 }
 
