@@ -1,72 +1,57 @@
 "use strict";
 
-//QUESTION: In class-inheritance style i would create an abstract motherobject with positional parameters and other similarities.
-//I would then generate player and enemy child-objects from motherobject that inherit similar properties. This einstellung
-// makes it hard for me to understand exactly how i should approach designing this game thinking in a prototype-delegation based way?
-
-//Currently there are no implemented collision when enemy hits enemy. My plan is to implement something similar to
-//enemy hits player, except when it hits the faster enemy has its speed reduced to slower enemies speed (or opposite).
-//Okay approach?
-
+//Hi, code is a bit messy, because im trying to "prototype-delegate" it.
 let gameAdjustmentVariables = {
 
     numberOfEnemies: 7,
     enemySpeed: 450,
 
-    //QUESTION is there a better way to extract width and height from a png? Collision detection works okay, but without
-    //exact width and height it will not be correct
+    //QUESTION is there a better way to extract width and height from any png? Collision detection works okay, but without
+    //exact width and height it will not be optimal
     gameObjectWidth: 50,
     gameObjectHeight: 50
 };
 
-let Enemy = function () {
+let GameObject = function(x, y, imageLocation) {
 
-    let obj = Object.create(Enemy.prototype);
-
-    obj.x = randomEnemyXStartValue();
-    obj.y = randomEnemyYStartValue();
-    obj.speed = randomEnemySpeedValue();
-    obj.sprite = 'images/enemy-bug.png';
-
-    return obj;
+    this.x = x;
+    this.y = y;
+    this.sprite = imageLocation;
 };
 
-let randomEnemyXStartValue = function () {
-
-    let startInColumn1 = 0,
-        startInColumn2 = 101,
-        startInColumn3 = 202,
-        startInColumn4 = 303,
-        startInColumn5 = 404,
-        startInColumn6 = 505,
-        startInColumn7 = 606;
-    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
-        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
-    ];
-    let randomStartColumn = Math.floor(Math.random() * 7);
-    let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
-
-    return randomHorizontalStartPosition;
+GameObject.prototype.render = function () {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-let randomEnemyYStartValue = function () {
+GameObject.prototype.objectCollision = function (obj1, obj2) {
 
-    let startInUpperRow = 59,
-        startInMiddleRow = 142,
-        startInLowerRow = 225;
-    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
-        startInLowerRow
-    ];
-    let randomStartRow = Math.floor(Math.random() * 3);
-    let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
+    return (obj1.x < obj2.x + obj2.width &&
+        obj1.x + obj1.width > obj2.x &&
+        obj1.y < obj2.y + obj2.height &&
+        obj1.height + obj1.y > obj2.y)
+    };
 
-    return randomVerticalStartPosition;
+GameObject.prototype.getPosition = function(obj) {
+
+    let objectPosition = {
+        x: obj.x,
+        y: obj.y,
+        width: gameAdjustmentVariables.gameObjectWidth,
+        height: gameAdjustmentVariables.gameObjectHeight
+    };
+    return objectPosition;
+}
+
+let Enemy = function (x, y, imageLocation) {
+
+    GameObject.call(this, x, y, imageLocation);
+
+    //QUESTION: How to access Enemy.prototype.randomEnemySpeedValue() here?
+        this.speed = 500;
 };
 
-let randomEnemySpeedValue = function () {
-    return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
-};
-
+Enemy.prototype = Object.create(GameObject.prototype);
+Enemy.prototype.constructor = Enemy;
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -80,6 +65,7 @@ Enemy.prototype.update = function (dt) {
 
     const canvasLength = 505;
     let randomLength = Math.random() * 300;
+    //This doesn't work - since the function ticks all the time, randomLength will approach ~0 after a few ticks
     let longestHorizontalPositionBeforeRespawn = canvasLength + randomLength;
     let currentHorizontalPosition = this.x;
 
@@ -99,57 +85,30 @@ Enemy.prototype.respawnEnemy = function (enemy) {
     enemy.speed = randomEnemySpeedValue();
 };
 
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function () {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-
-
 Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
 
-    let enemyPosition = {
-        x: this.x,
-        y: this.y,
-        width: gameAdjustmentVariables.gameObjectWidth,
-        height: gameAdjustmentVariables.gameObjectHeight
-    };
+    let enemyPosition = GameObject.prototype.getPosition(this);
 
-    if (playerPosition.x < enemyPosition.x + enemyPosition.width &&
-        playerPosition.x + playerPosition.width > enemyPosition.x &&
-        playerPosition.y < enemyPosition.y + enemyPosition.height &&
-        playerPosition.height + playerPosition.y > enemyPosition.y) {
 
+    let playerCollidesWithEnemy = GameObject.prototype.objectCollision(playerPosition, enemyPosition);
+
+    if(playerCollidesWithEnemy) {
         this.collision();
     }
+
 };
 
 Enemy.prototype.collision = function () {
 
-    //QUESTION is calling another prototype object like this good practice? Should it be done differently?
     player.moveToStartPosition(player);
     console.log("COLLISION");
 };
 
-let Player = function () {
+let Player = function (x, y, imageLocation) {
 
-    let playerObject = Object.create(Player.prototype);
-
-    playerObject.sprite = 'images/char-boy.png';
-
-    //QUESTION: Since i'm changing these values in the "moveToStartPosition" method (or function?),
-    //i did not assign values. Compiler doesn't like this - is it bad practice to declare without assigning
-    //values, then assign values in a following method?
-    playerObject.x;
-    playerObject.y;
-
-    //QUESTION: This call doesn't feel right - using both this and a playerObject. Is it necessary?
-    this.moveToStartPosition(playerObject);
-
-    return playerObject;
+    GameObject.call(this, x, y, imageLocation);
 };
 
-//QUESTION: Am i using this function correctly (should i pass in player, i could not get it to work with
-// this.x & this.y - and i don't understand why)?
 Player.prototype.moveToStartPosition = function (player) {
 
     const playerFixedHorizontalStartPosition = 203;
@@ -164,10 +123,10 @@ Player.prototype.update = function () {
     // which will ensure the game runs at the same speed for
     // all computers.
 
-    //QUESTION: What is the point of this update? Player moves instantaneously?
+    //QUESTION: What is the point of this update? Player teleports?
     //The way the engine is implemented it does not pass a dt parameter to player, only enemy
 };
-
+//QUESTION: If i remove this method player should fall back to GameObject.prototype.render (works with enemy). But it breaks the game, why?
 Player.prototype.render = function () {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
@@ -216,11 +175,9 @@ Player.prototype.handleInput = function (keyInput) {
 
     }
 };
-
+//QUESTION: Cannot remove this method either, something is wrong with player fallback to GameObject prototype methods i think
 Player.prototype.getPosition = function () {
 
-
-    //QUESTION code duplication; i do the same thing for enemy. How can i use prototype delegation to make this more efficient?
     let playerPosition = {
         x: this.x,
         y: this.y,
@@ -244,18 +201,65 @@ let playerHasWon = function () {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-let player = new Player();
+let player = new Player(203, 405, "images/char-boy.png");
 let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 let allEnemies = enemyFactory(numberOfEnemies);
 
+//QUESTION: I can't get this factorymethod to work when i add it to enemy.prototype - cannot find and access it
 function enemyFactory(numberOfEnemies) {
 
     let enemyContainer = [];
     for (let i = 0; i < numberOfEnemies; i++) {
-        enemyContainer.push(new Enemy);
+
+        // let randomX = randomEnemyXStartValue();
+
+        let newEnemy = new Enemy(101, 59, "images/enemy-bug.png");
+        enemyContainer.push(newEnemy);
     }
 
     return enemyContainer;
+}
+
+let randomEnemyXStartValue = function () {
+
+    let startInColumn1 = 0,
+        startInColumn2 = 101,
+        startInColumn3 = 202,
+        startInColumn4 = 303,
+        startInColumn5 = 404,
+        startInColumn6 = 505,
+        startInColumn7 = 606;
+    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
+        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
+    ];
+    let randomStartColumn = Math.floor(Math.random() * 7);
+    let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
+
+    return randomHorizontalStartPosition;
+};
+
+let randomEnemyYStartValue = function () {
+
+    let startInUpperRow = 59,
+        startInMiddleRow = 142,
+        startInLowerRow = 225;
+    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
+        startInLowerRow
+    ];
+    let randomStartRow = Math.floor(Math.random() * 3);
+    let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
+
+    return randomVerticalStartPosition;
+};
+
+let randomEnemySpeedValue = function () {
+    return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
+};
+
+let enemyType = function () {
+    let url = "images/enemy-bug.png";
+
+    return url;
 }
 
 document.addEventListener('keyup', function (e) {
