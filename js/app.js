@@ -4,12 +4,17 @@
 //I would then generate player and enemy child-objects from motherobject that inherit similar properties. This einstellung
 // makes it hard for me to understand exactly how i should approach designing this game thinking in a prototype-delegation based way?
 
+//Currently there are no implemented collision when enemy hits enemy. My plan is to implement something similar to
+//enemy hits player, except when it hits the faster enemy has its speed reduced to slower enemies speed (or opposite).
+//Okay approach?
+
 let gameAdjustmentVariables = {
 
     numberOfEnemies: 7,
     enemySpeed: 450,
 
-    //QUESTION is there a better way to extract width and height from a png?
+    //QUESTION is there a better way to extract width and height from a png? Collision detection works okay, but without
+    //exact width and height it will not be correct
     gameObjectWidth: 50,
     gameObjectHeight: 50
 };
@@ -114,24 +119,44 @@ Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
         playerPosition.y < enemyPosition.y + enemyPosition.height &&
         playerPosition.height + playerPosition.y > enemyPosition.y) {
 
-        console.log("COLLISION");
+        this.collision();
     }
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+Enemy.prototype.collision = function () {
+
+    //QUESTION is calling another prototype object like this good practice? Should it be done differently?
+    player.moveToStartPosition(player);
+    console.log("COLLISION");
+};
+
 let Player = function () {
 
-    const playerFixedHorizontalStartPosition = 203;
-    const playerFixedVerticalStartPosition = 405;
     let playerObject = Object.create(Player.prototype);
 
     playerObject.sprite = 'images/char-boy.png';
-    playerObject.x = playerFixedHorizontalStartPosition;
-    playerObject.y = playerFixedVerticalStartPosition;
+
+    //QUESTION: Since i'm changing these values in the "moveToStartPosition" method (or function?),
+    //i did not assign values. Compiler doesn't like this - is it bad practice to declare without assigning
+    //values, then assign values in a following method?
+    playerObject.x;
+    playerObject.y;
+
+    //QUESTION: This call doesn't feel right - using both this and a playerObject. Is it necessary?
+    this.moveToStartPosition(playerObject);
 
     return playerObject;
+};
+
+//QUESTION: Am i using this function correctly (should i pass in player, i could not get it to work with
+// this.x & this.y - and i don't understand why)?
+Player.prototype.moveToStartPosition = function (player) {
+
+    const playerFixedHorizontalStartPosition = 203;
+    const playerFixedVerticalStartPosition = 405;
+
+    player.x = playerFixedHorizontalStartPosition;
+    player.y = playerFixedVerticalStartPosition;
 };
 
 Player.prototype.update = function () {
