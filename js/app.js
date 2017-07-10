@@ -1,11 +1,13 @@
-var gameAdjustmentVariables = {
+"use strict";
+
+let gameAdjustmentVariables = {
 
   numberOfEnemies: 7,
   enemySpeed: 450
 };
 
 // Enemies our player must avoid
-var Enemy = function() {
+let Enemy = function() {
   // Variables applied to each of our instances go here,
   // we've provided one for you to get started
 
@@ -13,6 +15,7 @@ var Enemy = function() {
   // a helper we've provided to easily load images
   //using object.create setups the prototype
   let obj = Object.create(Enemy.prototype);
+
   obj.x = randomEnemyXStartValue();
   obj.y = randomEnemyYStartValue();
   obj.speed = randomEnemySpeedValue();
@@ -21,9 +24,7 @@ var Enemy = function() {
   return obj;
 };
 
-//QUESTION: Should these randomizer functions run be placed in prototype or
-//in global scope
-var randomEnemyXStartValue = function() {
+let randomEnemyXStartValue = function() {
 
   let startInColumn1 = 0,
     startInColumn2 = 101,
@@ -39,9 +40,9 @@ var randomEnemyXStartValue = function() {
   let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
 
   return randomHorizontalStartPosition;
-}
+};
 
-var randomEnemyYStartValue = function() {
+let randomEnemyYStartValue = function() {
 
   let startInUpperRow = 59,
     startInMiddleRow = 142,
@@ -53,11 +54,11 @@ var randomEnemyYStartValue = function() {
   let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
 
   return randomVerticalStartPosition;
-}
+};
 
-var randomEnemySpeedValue = function() {
+let randomEnemySpeedValue = function() {
   return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
-}
+};
 
 
 // Update the enemy's position, required method for game
@@ -66,20 +67,24 @@ Enemy.prototype.update = function(dt) {
   // You should multiply any movement by the dt parameter
   // which will ensure the game runs at the same speed for
   // all computers.
-  let startPosition = -150;
-  let highestHorizontalPositionBeforeReset = 505 + Math.random() * 300;
+
+  let highestHorizontalPositionBeforeRespawn = 505 + Math.random()*300;
   let currentHorizontalPosition = this.x;
 
-  if (currentHorizontalPosition > highestHorizontalPositionBeforeReset) {
-
-    this.x = startPosition;
-    this.y = randomEnemyYStartValue();
-    this.speed = randomEnemySpeedValue();
+  if (currentHorizontalPosition > highestHorizontalPositionBeforeRespawn) {
+      Enemy.prototype.respawnEnemy(this);
   } else {
-
-    this.x += this.speed * dt;
+    this.x += this.speed*dt;
   }
+};
 
+Enemy.prototype.respawnEnemy = function(enemy) {
+
+    const startPosition = -150;
+
+    enemy.x = startPosition;
+    enemy.y = randomEnemyYStartValue();
+    enemy.speed = randomEnemySpeedValue();
 };
 
 // Draw the enemy on the screen, required method for game
@@ -87,19 +92,17 @@ Enemy.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+
+
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function() {
+let Player = function() {
 
-  let playerFixedHorizontalStartPosition = 203;
-  let playerFixedVerticalStartPosition = 405;
-  // Variables applied to each of our instances go here,
-  // we've provided one for you to get started
-
-  // The image/sprite for our enemies, this uses
-  // a helper we've provided to easily load images
+  const playerFixedHorizontalStartPosition = 203;
+  const playerFixedVerticalStartPosition = 405;
   let playerObject = Object.create(Player.prototype);
+
   playerObject.sprite = 'images/char-boy.png';
   playerObject.x = playerFixedHorizontalStartPosition;
   playerObject.y = playerFixedVerticalStartPosition;
@@ -123,11 +126,10 @@ Player.prototype.render = function() {
 Player.prototype.handleInput = function(keyInput) {
   //QUESTION: Would it make more sense to store the maxAllowedValues somewhere else
   //so i dont have to declare them every time?
-  let minAllowedMovementWest = 101;
-  let maxAllowedMovementEast = 305;
-  let minAllowedMovementNorth = 72;
-  let maxAllowedMovementSouth = 405;
-
+  const minAllowedMovementWest = 101;
+  const maxAllowedMovementEast = 305;
+  const minAllowedMovementNorth = 72;
+  const maxAllowedMovementSouth = 405;
 
   let currentHorizontalPosition = this.x;
   let currentVerticalPosition = this.y;
@@ -169,28 +171,24 @@ Player.prototype.handleInput = function(keyInput) {
       }
 
   }
-}
+};
 
-var playerIsInWinningPosition = function(currentVerticalPosition) {
+let playerIsInWinningPosition = function(currentVerticalPosition) {
   let winConditionPlayerReachesWater = 72;
 
-  if (currentVerticalPosition < winConditionPlayerReachesWater) {
-    return true;
-  } else {
-    return false;
-  }
-}
+  return currentVerticalPosition < winConditionPlayerReachesWater;
+};
 
-var playerHasWon = function() {
-console.log("hurray");
-}
+let playerHasWon = function() {
+  console.log("hurray");
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var player = new Player();
-var numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
-var allEnemies = enemyFactory(numberOfEnemies);
+let player = new Player();
+let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
+let allEnemies = enemyFactory(numberOfEnemies);
 
 function enemyFactory(numberOfEnemies) {
 
@@ -200,10 +198,10 @@ function enemyFactory(numberOfEnemies) {
   }
 
   return enemyContainer;
-};
+}
 
 document.addEventListener('keyup', function(e) {
-  var allowedKeys = {
+  let allowedKeys = {
     37: 'left',
     38: 'up',
     39: 'right',
