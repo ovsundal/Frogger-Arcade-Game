@@ -1,84 +1,91 @@
 "use strict";
 
+//QUESTION: In class-inheritance style i would create an abstract motherobject with positional parameters and other similarities.
+//I would then generate player and enemy child-objects from motherobject that inherit similar properties. This einstellung
+// makes it hard for me to understand exactly how i should approach designing this game thinking in a prototype-delegation based way?
+
 let gameAdjustmentVariables = {
 
-  numberOfEnemies: 7,
-  enemySpeed: 450
+    numberOfEnemies: 7,
+    enemySpeed: 450,
+
+    //QUESTION is there a better way to extract width and height from a png?
+    gameObjectWidth: 50,
+    gameObjectHeight: 50
 };
 
-// Enemies our player must avoid
-let Enemy = function() {
-  // Variables applied to each of our instances go here,
-  // we've provided one for you to get started
+let Enemy = function () {
 
-  // The image/sprite for our enemies, this uses
-  // a helper we've provided to easily load images
-  //using object.create setups the prototype
-  let obj = Object.create(Enemy.prototype);
+    let obj = Object.create(Enemy.prototype);
 
-  obj.x = randomEnemyXStartValue();
-  obj.y = randomEnemyYStartValue();
-  obj.speed = randomEnemySpeedValue();
-  obj.sprite = 'images/enemy-bug.png';
+    obj.x = randomEnemyXStartValue();
+    obj.y = randomEnemyYStartValue();
+    obj.speed = randomEnemySpeedValue();
+    obj.sprite = 'images/enemy-bug.png';
 
-  return obj;
+    return obj;
 };
 
-let randomEnemyXStartValue = function() {
+let randomEnemyXStartValue = function () {
 
-  let startInColumn1 = 0,
-    startInColumn2 = 101,
-    startInColumn3 = 202,
-    startInColumn4 = 303,
-    startInColumn5 = 404,
-    startInColumn6 = 505,
-    startInColumn7 = 606;
-  let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
-    startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
-  ];
-  let randomStartColumn = Math.floor(Math.random() * 7);
-  let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
+    let startInColumn1 = 0,
+        startInColumn2 = 101,
+        startInColumn3 = 202,
+        startInColumn4 = 303,
+        startInColumn5 = 404,
+        startInColumn6 = 505,
+        startInColumn7 = 606;
+    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
+        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
+    ];
+    let randomStartColumn = Math.floor(Math.random() * 7);
+    let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
 
-  return randomHorizontalStartPosition;
+    return randomHorizontalStartPosition;
 };
 
-let randomEnemyYStartValue = function() {
+let randomEnemyYStartValue = function () {
 
-  let startInUpperRow = 59,
-    startInMiddleRow = 142,
-    startInLowerRow = 225;
-  let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
-    startInLowerRow
-  ];
-  let randomStartRow = Math.floor(Math.random() * 3);
-  let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
+    let startInUpperRow = 59,
+        startInMiddleRow = 142,
+        startInLowerRow = 225;
+    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
+        startInLowerRow
+    ];
+    let randomStartRow = Math.floor(Math.random() * 3);
+    let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
 
-  return randomVerticalStartPosition;
+    return randomVerticalStartPosition;
 };
 
-let randomEnemySpeedValue = function() {
-  return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
+let randomEnemySpeedValue = function () {
+    return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
 };
 
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
-Enemy.prototype.update = function(dt) {
-  // You should multiply any movement by the dt parameter
-  // which will ensure the game runs at the same speed for
-  // all computers.
+Enemy.prototype.update = function (dt) {
+    // You should multiply any movement by the dt parameter
+    // which will ensure the game runs at the same speed for
+    // all computers.
 
-  let highestHorizontalPositionBeforeRespawn = 505 + Math.random()*300;
-  let currentHorizontalPosition = this.x;
+    //QUESTION: Is there a better way to show clarity in my code (avoid magic numbers)
+    // without having to define these variables every time?
 
-  if (currentHorizontalPosition > highestHorizontalPositionBeforeRespawn) {
-      Enemy.prototype.respawnEnemy(this);
-  } else {
-    this.x += this.speed*dt;
-  }
+    const canvasLength = 505;
+    let randomLength = Math.random() * 300;
+    let longestHorizontalPositionBeforeRespawn = canvasLength + randomLength;
+    let currentHorizontalPosition = this.x;
+
+    if (currentHorizontalPosition > longestHorizontalPositionBeforeRespawn) {
+        Enemy.prototype.respawnEnemy(this);
+    } else {
+        this.x += this.speed * dt;
+    }
 };
 
-Enemy.prototype.respawnEnemy = function(enemy) {
+Enemy.prototype.respawnEnemy = function (enemy) {
 
     const startPosition = -150;
 
@@ -88,99 +95,125 @@ Enemy.prototype.respawnEnemy = function(enemy) {
 };
 
 // Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+Enemy.prototype.render = function () {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
 
+Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
+
+    let enemyPosition = {
+        x: this.x,
+        y: this.y,
+        width: gameAdjustmentVariables.gameObjectWidth,
+        height: gameAdjustmentVariables.gameObjectHeight
+    };
+
+    if (playerPosition.x < enemyPosition.x + enemyPosition.width &&
+        playerPosition.x + playerPosition.width > enemyPosition.x &&
+        playerPosition.y < enemyPosition.y + enemyPosition.height &&
+        playerPosition.height + playerPosition.y > enemyPosition.y) {
+
+        console.log("COLLISION");
+    }
+};
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-let Player = function() {
+let Player = function () {
 
-  const playerFixedHorizontalStartPosition = 203;
-  const playerFixedVerticalStartPosition = 405;
-  let playerObject = Object.create(Player.prototype);
+    const playerFixedHorizontalStartPosition = 203;
+    const playerFixedVerticalStartPosition = 405;
+    let playerObject = Object.create(Player.prototype);
 
-  playerObject.sprite = 'images/char-boy.png';
-  playerObject.x = playerFixedHorizontalStartPosition;
-  playerObject.y = playerFixedVerticalStartPosition;
+    playerObject.sprite = 'images/char-boy.png';
+    playerObject.x = playerFixedHorizontalStartPosition;
+    playerObject.y = playerFixedVerticalStartPosition;
 
-  return playerObject;
+    return playerObject;
 };
 
-Player.prototype.update = function() {
-  // You should multiply any movement by the dt parameter
-  // which will ensure the game runs at the same speed for
-  // all computers.
+Player.prototype.update = function () {
+    // You should multiply any movement by the dt parameter
+    // which will ensure the game runs at the same speed for
+    // all computers.
 
-  //QUESTION: What is the point of this update? Player moves instantaneously?
-  //The way the engine is implemented it does not pass a dt parameter to player, only enemy
+    //QUESTION: What is the point of this update? Player moves instantaneously?
+    //The way the engine is implemented it does not pass a dt parameter to player, only enemy
 };
 
-Player.prototype.render = function() {
-  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+Player.prototype.render = function () {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-Player.prototype.handleInput = function(keyInput) {
-  //QUESTION: Would it make more sense to store the maxAllowedValues somewhere else
-  //so i dont have to declare them every time?
-  const minAllowedMovementWest = 101;
-  const maxAllowedMovementEast = 305;
-  const minAllowedMovementNorth = 72;
-  const maxAllowedMovementSouth = 405;
+Player.prototype.handleInput = function (keyInput) {
+    //QUESTION: Would it make more sense to store the maxAllowedValues somewhere else
+    //so i dont have to declare them every time?
+    const minAllowedMovementWest = 101;
+    const maxAllowedMovementEast = 305;
+    const minAllowedMovementNorth = 72;
+    const maxAllowedMovementSouth = 405;
 
-  let currentHorizontalPosition = this.x;
-  let currentVerticalPosition = this.y;
+    let currentHorizontalPosition = this.x;
+    let currentVerticalPosition = this.y;
 
-  switch (keyInput) {
-    case ("left"):
-      {
-        if (currentHorizontalPosition > minAllowedMovementWest) {
-          this.x -= 101;
+    switch (keyInput) {
+        case ("left"): {
+            if (currentHorizontalPosition > minAllowedMovementWest) {
+                this.x -= 101;
+            }
+            break;
         }
-        break;
-      }
-    case ("right"):
-      {
-        if (currentHorizontalPosition < maxAllowedMovementEast)
-          this.x += 101;
-        break;
-      }
-    case ("up"):
-      {
-        if (currentVerticalPosition > minAllowedMovementNorth) {
-          this.y -= 83;
+        case ("right"): {
+            if (currentHorizontalPosition < maxAllowedMovementEast)
+                this.x += 101;
+            break;
         }
-        if (playerIsInWinningPosition(this.y)) {
-          playerHasWon();
+        case ("up"): {
+            if (currentVerticalPosition > minAllowedMovementNorth) {
+                this.y -= 83;
+            }
+            if (playerIsInWinningPosition(this.y)) {
+                playerHasWon();
+            }
+            break;
         }
-        break;
-      }
-    case ("down"):
-      {
-        if (currentVerticalPosition < maxAllowedMovementSouth) {
-          this.y += 83;
+        case ("down"): {
+            if (currentVerticalPosition < maxAllowedMovementSouth) {
+                this.y += 83;
+            }
+            break;
         }
-        break;
-      }
-    default:
-      {
-        break;
-      }
+        default: {
+            break;
+        }
 
-  }
+    }
 };
 
-let playerIsInWinningPosition = function(currentVerticalPosition) {
-  let winConditionPlayerReachesWater = 72;
+Player.prototype.getPosition = function () {
 
-  return currentVerticalPosition < winConditionPlayerReachesWater;
+
+    //QUESTION code duplication; i do the same thing for enemy. How can i use prototype delegation to make this more efficient?
+    let playerPosition = {
+        x: this.x,
+        y: this.y,
+        width: gameAdjustmentVariables.gameObjectWidth,
+        height: gameAdjustmentVariables.gameObjectHeight
+    };
+
+    return playerPosition;
 };
 
-let playerHasWon = function() {
-  console.log("hurray");
+let playerIsInWinningPosition = function (currentVerticalPosition) {
+    let winConditionPlayerReachesWater = 72;
+
+    return currentVerticalPosition < winConditionPlayerReachesWater;
+};
+
+let playerHasWon = function () {
+    console.log("hurray");
 };
 
 // Now instantiate your objects.
@@ -192,20 +225,20 @@ let allEnemies = enemyFactory(numberOfEnemies);
 
 function enemyFactory(numberOfEnemies) {
 
-  let enemyContainer = [];
-  for (let i = 0; i < numberOfEnemies; i++) {
-    enemyContainer.push(new Enemy);
-  }
+    let enemyContainer = [];
+    for (let i = 0; i < numberOfEnemies; i++) {
+        enemyContainer.push(new Enemy);
+    }
 
-  return enemyContainer;
+    return enemyContainer;
 }
 
-document.addEventListener('keyup', function(e) {
-  let allowedKeys = {
-    37: 'left',
-    38: 'up',
-    39: 'right',
-    40: 'down'
-  };
-  player.handleInput(allowedKeys[e.keyCode]);
+document.addEventListener('keyup', function (e) {
+    let allowedKeys = {
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down'
+    };
+    player.handleInput(allowedKeys[e.keyCode]);
 });

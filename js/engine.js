@@ -99,7 +99,7 @@ var Engine = (function(global) {
 
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
-            enemy.hasCollisionWithPlayer();
+            enemy.hasCollisionWithPlayer(player.getPosition());
         })
     }
 
