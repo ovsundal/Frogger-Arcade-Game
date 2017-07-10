@@ -20,6 +20,7 @@ let GameObject = function(x, y, imageLocation) {
 };
 
 GameObject.prototype.render = function () {
+
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
@@ -40,7 +41,7 @@ GameObject.prototype.getPosition = function(obj) {
         height: gameAdjustmentVariables.gameObjectHeight
     };
     return objectPosition;
-}
+};
 
 let Enemy = function (x, y, imageLocation) {
 
@@ -88,20 +89,12 @@ Enemy.prototype.respawnEnemy = function (enemy) {
 Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
 
     let enemyPosition = GameObject.prototype.getPosition(this);
-
-
     let playerCollidesWithEnemy = GameObject.prototype.objectCollision(playerPosition, enemyPosition);
 
     if(playerCollidesWithEnemy) {
-        this.collision();
+
+        player.moveToStartPosition();
     }
-
-};
-
-Enemy.prototype.collision = function () {
-
-    player.moveToStartPosition(player);
-    console.log("COLLISION");
 };
 
 let Player = function (x, y, imageLocation) {
@@ -109,21 +102,29 @@ let Player = function (x, y, imageLocation) {
     GameObject.call(this, x, y, imageLocation);
 };
 
-Player.prototype.moveToStartPosition = function (player) {
+Player.prototype.moveToStartPosition = function () {
 
     const playerFixedHorizontalStartPosition = 203;
     const playerFixedVerticalStartPosition = 405;
 
-    player.x = playerFixedHorizontalStartPosition;
-    player.y = playerFixedVerticalStartPosition;
+    this.x = playerFixedHorizontalStartPosition;
+    this.y = playerFixedVerticalStartPosition;
+
+    console.log("COLLISION");
 };
 
 Player.prototype.update = function () {
+
+    let playerVerticalPosition = player.getPosition().y;
+
+    if(this.isPlayerInWinningPosition(playerVerticalPosition)) {
+        this.playerHasWon();
+    }
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
 
-    //QUESTION: What is the point of this update? Player teleports?
+    //QUESTION: What is the point of multiplying movement of player? Player teleports?
     //The way the engine is implemented it does not pass a dt parameter to player, only enemy
 };
 //QUESTION: If i remove this method player should fall back to GameObject.prototype.render (works with enemy). But it breaks the game, why?
@@ -158,9 +159,6 @@ Player.prototype.handleInput = function (keyInput) {
             if (currentVerticalPosition > minAllowedMovementNorth) {
                 this.y -= 83;
             }
-            if (playerIsInWinningPosition(this.y)) {
-                playerHasWon();
-            }
             break;
         }
         case ("down"): {
@@ -188,14 +186,17 @@ Player.prototype.getPosition = function () {
     return playerPosition;
 };
 
-let playerIsInWinningPosition = function (currentVerticalPosition) {
+Player.prototype.isPlayerInWinningPosition = function (currentVerticalPosition) {
     let winConditionPlayerReachesWater = 72;
 
     return currentVerticalPosition < winConditionPlayerReachesWater;
 };
 
-let playerHasWon = function () {
+Player.prototype.playerHasWon = function () {
+
+    //QUESTION: How to make screen go grey and wait 1 sec
     console.log("hurray");
+
 };
 
 // Now instantiate your objects.
@@ -210,8 +211,6 @@ function enemyFactory(numberOfEnemies) {
 
     let enemyContainer = [];
     for (let i = 0; i < numberOfEnemies; i++) {
-
-        // let randomX = randomEnemyXStartValue();
 
         let newEnemy = new Enemy(101, 59, "images/enemy-bug.png");
         enemyContainer.push(newEnemy);
