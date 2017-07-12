@@ -1,9 +1,8 @@
 "use strict";
 
-//Hi, code is a bit messy, because im trying to "prototype-delegate" it.
 let gameAdjustmentVariables = {
 
-    numberOfEnemies: 3,
+    numberOfEnemies: 5,
     enemyImage: "images/enemy-bug.png",
     enemyStartPositionX: randomEnemyXStartValue(),
     enemyStartPositionY: randomEnemyYStartValue(),
@@ -13,14 +12,11 @@ let gameAdjustmentVariables = {
     playerStartPositionY: 405,
     playerImage: "images/char-boy.png",
 
-    //QUESTION is there a better way to extract width and height from any png? Collision detection works okay, but without
-    //exact width and height it will not be optimal
+    //QUESTION FOR REVIEWER is there a better way to extract width and height from any png? Collision detection works okay,
+    // but without exact width and height it will not be optimal
     gameObjectWidth: 50,
     gameObjectHeight: 50
 };
-
-
-
 
 let GameObject = function(x, y, imageLocation) {
 
@@ -63,34 +59,29 @@ let Enemy = function (x, y, imageLocation, speed) {
 };
 
 Enemy.prototype = Object.create(GameObject.prototype);
+
 Enemy.prototype.constructor = Enemy;
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function (dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-
-    //QUESTION: Is there a better way to show clarity in my code (avoid magic numbers)
-    // without having to define these variables every time?
 
     const canvasLength = 505;
-    let randomLength = Math.random() * 300;
-    //This doesn't work - since the function ticks all the time, randomLength will approach ~0 after a few ticks
-    let longestHorizontalPositionBeforeRespawn = canvasLength + randomLength;
+
     let currentHorizontalPosition = this.x;
 
-    if (currentHorizontalPosition > longestHorizontalPositionBeforeRespawn) {
+    if (currentHorizontalPosition > canvasLength) {
         Enemy.prototype.respawnEnemy(this);
     } else {
         this.x += this.speed * dt;
     }
 };
 
+//Respawns enemy. Added randomization by letting enemy respawn outside of canvas with a new speed value (takes a random
+// amount of time to reach canvas).
 Enemy.prototype.respawnEnemy = function (enemy) {
 
-    const startPosition = -150;
+    const startPosition = -250;
 
     if(enemy.isActive) {
         enemy.x = startPosition;
@@ -140,9 +131,8 @@ Player.prototype.update = function () {
 //condition that triggers when player reaches water tile
 Player.prototype.playerHasWon = function () {
 
-    //QUESTION: If i put despawnEnemies inside Enemy.prototype, how would i call it here?
+    //QUESTION FOR REVIEWER: If i put despawnEnemies inside Enemy.prototype, how would i call it here, inside Player prototype?
     despawnEnemies(allEnemies);
-
 };
 
 //removes all enemies by setting their x value outside of canvas, and prevent respawn by setting isActive = false
@@ -209,7 +199,7 @@ let player = new Player(gameAdjustmentVariables.playerStartPositionX, gameAdjust
 let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 
 let allEnemies = enemyFactory(numberOfEnemies);
-//COLLISION NOT ACCURATE ENOUGH
+
 //QUESTION FOR REVIEWER: I am not happy with all these enemy functions in the global scope - i want to encapsulate them in Enemy.prototype
 //But i can't get that to work, if i put the factory method there i will need to create an enemy object and then access
 //the factory method? This doesn't feel right, so any ideas how i can improve this code architecture?
@@ -259,7 +249,7 @@ function randomEnemyYStartValue() {
 }
 
 function randomEnemySpeedValue() {
-    return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
+    return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
 };
 
 document.addEventListener('keyup', function (e) {
