@@ -4,8 +4,8 @@ let gameAdjustmentVariables = {
 
     numberOfEnemies: 5,
     enemyImage: "images/enemy-bug.png",
-    enemyStartPositionX: randomEnemyXStartValue(),
-    enemyStartPositionY: randomEnemyYStartValue(),
+    // enemyStartPositionX: randomEnemyXStartValue(),
+    // enemyStartPositionY: randomEnemyYStartValue(),
     enemySpeed: 150,
 
     playerStartPositionX: 203,
@@ -18,18 +18,20 @@ let gameAdjustmentVariables = {
     gameObjectHeight: 50
 };
 
+//GameObject defines game events, updates and creates player/enemy
 let GameObject = function(x, y, imageLocation) {
 
     this.x = x;
     this.y = y;
     this.sprite = imageLocation;
 };
-
+//first, render page
 GameObject.prototype.render = function () {
 
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+//then, check if player has collided with enemy
 GameObject.prototype.objectsAreColliding = function (obj1, obj2) {
 
     return (obj1.x < obj2.x + obj2.width &&
@@ -37,6 +39,15 @@ GameObject.prototype.objectsAreColliding = function (obj1, obj2) {
         obj1.y < obj2.y + obj2.height &&
         obj1.height + obj1.y > obj2.y)
     };
+
+//then, check if player is in winning position
+GameObject.prototype.isPlayerInWinningPosition = function(currentVericalPosition) {
+
+    let winConditionPlayerReachesWater = 72;
+
+    return currentVericalPosition < winConditionPlayerReachesWater;
+};
+
 
 GameObject.prototype.getPosition = function(obj) {
 
@@ -49,6 +60,62 @@ GameObject.prototype.getPosition = function(obj) {
 
     return objectPosition;
 };
+
+GameObject.prototype.enemyFactory = function(numberOfEnemies) {
+
+    let enemyContainer = [];
+    for (let i = 0; i < numberOfEnemies; i++) {
+        debugger;
+        let newEnemy = new Enemy(this.getRandomCol(), this.getRandomRow(), gameAdjustmentVariables.enemyImage,
+            this.getRandomSpeed());
+        enemyContainer.push(newEnemy);
+    }
+
+    return enemyContainer;
+};
+
+GameObject.prototype.getRandomCol = function () {
+
+    let startInColumn1 = 0,
+        startInColumn2 = 101,
+        startInColumn3 = 202,
+        startInColumn4 = 303,
+        startInColumn5 = 404,
+        startInColumn6 = 505,
+        startInColumn7 = 606;
+    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
+        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
+    ];
+    let randomStartColumn = Math.floor(Math.random() * 7);
+    let randomCol = horizontalEnemyStartPositions[randomStartColumn];
+
+    return randomCol;
+};
+
+GameObject.prototype.getRandomRow = function() {
+
+    let startInUpperRow = 59,
+        startInMiddleRow = 142,
+        startInLowerRow = 225;
+    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
+        startInLowerRow
+    ];
+    let randomStartRow = Math.floor(Math.random() * 3);
+    let randomRow = verticalEnemyStartPositions[randomStartRow];
+
+    return randomRow;
+};
+
+GameObject.prototype.getRandomSpeed = function () {
+
+    return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
+};
+
+
+//Should this be a method of enemy? I could not implement it, could not find class if i tried to access it with enemy object
+
+
+
 
 let Enemy = function (x, y, imageLocation, speed) {
 
@@ -82,11 +149,11 @@ Enemy.prototype.update = function (dt) {
 Enemy.prototype.respawnEnemy = function (enemy) {
 
     const startPosition = -250;
-
+debugger;
     if(enemy.isActive) {
         enemy.x = startPosition;
-        enemy.y = randomEnemyYStartValue();
-        enemy.speed = randomEnemySpeedValue();
+        enemy.y = GameObject.prototype.getRandomRow();
+        enemy.speed = GameObject.prototype.getRandomSpeed();
     }
 };
 
@@ -121,7 +188,11 @@ Player.prototype.moveToStartPosition = function () {
 Player.prototype.update = function () {
 
     let playerVerticalPosition = GameObject.prototype.getPosition(this).y;
+    let playerIsInWinningPosition = GameObject.prototype.isPlayerInWinningPosition(playerVerticalPosition);
 
+    if(playerIsInWinningPosition) {
+
+    }
     if(this.isPlayerInWinningPosition(playerVerticalPosition)) {
 
         this.playerHasWon();
@@ -146,8 +217,7 @@ function despawnEnemies(allEnemies) {
 }
 
 Player.prototype.handleInput = function (keyInput) {
-    //QUESTION: Would it make more sense to store the maxAllowedValues somewhere else
-    //so i dont have to declare them every time?
+
     const minAllowedMovementWest = 101;
     const maxAllowedMovementEast = 305;
     const minAllowedMovementNorth = 72;
@@ -187,70 +257,14 @@ Player.prototype.handleInput = function (keyInput) {
     }
 };
 
-Player.prototype.isPlayerInWinningPosition = function (currentVerticalPosition) {
+//instantiate objects
 
-    let winConditionPlayerReachesWater = 72;
-
-    return currentVerticalPosition < winConditionPlayerReachesWater;
-};
-
+let allEnemies = new Enemy();
 let player = new Player(gameAdjustmentVariables.playerStartPositionX, gameAdjustmentVariables.playerStartPositionY,
     gameAdjustmentVariables.playerImage);
 let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 
-let allEnemies = enemyFactory(numberOfEnemies);
-
-//QUESTION FOR REVIEWER: I am not happy with all these enemy functions in the global scope - i want to encapsulate them in Enemy.prototype
-//But i can't get that to work, if i put the factory method there i will need to create an enemy object and then access
-//the factory method? This doesn't feel right, so any ideas how i can improve this code architecture?
-function enemyFactory(numberOfEnemies) {
-
-    let enemyContainer = [];
-    for (let i = 0; i < numberOfEnemies; i++) {
-
-        let newEnemy = new Enemy(randomEnemyXStartValue(), randomEnemyYStartValue(), gameAdjustmentVariables.enemyImage,
-            randomEnemySpeedValue());
-        enemyContainer.push(newEnemy);
-    }
-
-    return enemyContainer;
-}
-
-function randomEnemyXStartValue() {
-
-    let startInColumn1 = 0,
-        startInColumn2 = 101,
-        startInColumn3 = 202,
-        startInColumn4 = 303,
-        startInColumn5 = 404,
-        startInColumn6 = 505,
-        startInColumn7 = 606;
-    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
-        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
-    ];
-    let randomStartColumn = Math.floor(Math.random() * 7);
-    let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
-
-    return randomHorizontalStartPosition;
-}
-
-function randomEnemyYStartValue() {
-
-    let startInUpperRow = 59,
-        startInMiddleRow = 142,
-        startInLowerRow = 225;
-    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
-        startInLowerRow
-    ];
-    let randomStartRow = Math.floor(Math.random() * 3);
-    let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
-
-    return randomVerticalStartPosition;
-}
-
-function randomEnemySpeedValue() {
-    return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
-};
+allEnemies = allEnemies.enemyFactory(numberOfEnemies);
 
 document.addEventListener('keyup', function (e) {
     let allowedKeys = {
