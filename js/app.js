@@ -3,14 +3,24 @@
 //Hi, code is a bit messy, because im trying to "prototype-delegate" it.
 let gameAdjustmentVariables = {
 
-    numberOfEnemies: 7,
-    enemySpeed: 450,
+    numberOfEnemies: 3,
+    enemyImage: "images/enemy-bug.png",
+    enemyStartPositionX: randomEnemyXStartValue(),
+    enemyStartPositionY: randomEnemyYStartValue(),
+    enemySpeed: 150,
+
+    playerStartPositionX: 203,
+    playerStartPositionY: 405,
+    playerImage: "images/char-boy.png",
 
     //QUESTION is there a better way to extract width and height from any png? Collision detection works okay, but without
     //exact width and height it will not be optimal
     gameObjectWidth: 50,
     gameObjectHeight: 50
 };
+
+
+
 
 let GameObject = function(x, y, imageLocation) {
 
@@ -40,15 +50,16 @@ GameObject.prototype.getPosition = function(obj) {
         width: gameAdjustmentVariables.gameObjectWidth,
         height: gameAdjustmentVariables.gameObjectHeight
     };
+
     return objectPosition;
 };
 
-let Enemy = function (x, y, imageLocation) {
+let Enemy = function (x, y, imageLocation, speed) {
 
     GameObject.call(this, x, y, imageLocation);
 
-    //QUESTION: How to access Enemy.prototype.randomEnemySpeedValue() here?
-        this.speed = 500;
+    this.isActive = true;
+    this.speed = speed;
 };
 
 Enemy.prototype = Object.create(GameObject.prototype);
@@ -81,9 +92,11 @@ Enemy.prototype.respawnEnemy = function (enemy) {
 
     const startPosition = -150;
 
-    enemy.x = startPosition;
-    enemy.y = randomEnemyYStartValue();
-    enemy.speed = randomEnemySpeedValue();
+    if(enemy.isActive) {
+        enemy.x = startPosition;
+        enemy.y = randomEnemyYStartValue();
+        enemy.speed = randomEnemySpeedValue();
+    }
 };
 
 Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
@@ -103,29 +116,44 @@ let Player = function (x, y, imageLocation) {
 };
 
 Player.prototype = Object.create(GameObject.prototype);
+
 Player.prototype.constructor = Player;
 
 Player.prototype.moveToStartPosition = function () {
 
-    const playerFixedHorizontalStartPosition = 203;
-    const playerFixedVerticalStartPosition = 405;
+    this.x = gameAdjustmentVariables.playerStartPositionX;
+    this.y = gameAdjustmentVariables.playerStartPositionY;
 
-    this.x = playerFixedHorizontalStartPosition;
-    this.y = playerFixedVerticalStartPosition;
-
-    console.log("COLLISION");
 };
 
+//Check if player has won (stands on water tile)
 Player.prototype.update = function () {
 
     let playerVerticalPosition = GameObject.prototype.getPosition(this).y;
-//BYTTET UT DEN UNDER MED DEN OVER I GÅR
-    // let playerVerticalPosition = player.getPosition().y;
 
     if(this.isPlayerInWinningPosition(playerVerticalPosition)) {
+
         this.playerHasWon();
     }
 };
+
+//condition that triggers when player reaches water tile
+Player.prototype.playerHasWon = function () {
+
+    //QUESTION: If i put despawnEnemies inside Enemy.prototype, how would i call it here?
+    despawnEnemies(allEnemies);
+
+};
+
+//removes all enemies by setting their x value outside of canvas, and prevent respawn by setting isActive = false
+function despawnEnemies(allEnemies) {
+
+    //remove enemies by setting their x value outside the canvas
+    allEnemies.forEach(function(enemy) {
+        enemy.x = 1000;
+        enemy.isActive = false;
+    });
+}
 
 Player.prototype.handleInput = function (keyInput) {
     //QUESTION: Would it make more sense to store the maxAllowedValues somewhere else
@@ -170,39 +198,35 @@ Player.prototype.handleInput = function (keyInput) {
 };
 
 Player.prototype.isPlayerInWinningPosition = function (currentVerticalPosition) {
+
     let winConditionPlayerReachesWater = 72;
 
     return currentVerticalPosition < winConditionPlayerReachesWater;
 };
 
-Player.prototype.playerHasWon = function () {
-
-    //QUESTION: How to make screen go grey and wait 1 sec
-    console.log("hurray");
-
-};
-
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
-let player = new Player(203, 405, "images/char-boy.png");
+let player = new Player(gameAdjustmentVariables.playerStartPositionX, gameAdjustmentVariables.playerStartPositionY,
+    gameAdjustmentVariables.playerImage);
 let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
-let allEnemies = enemyFactory(numberOfEnemies);
 
-//QUESTION: I can't get this factorymethod to work when i add it to enemy.prototype - cannot find and access it
+let allEnemies = enemyFactory(numberOfEnemies);
+//COLLISION NOT ACCURATE ENOUGH
+//QUESTION FOR REVIEWER: I am not happy with all these enemy functions in the global scope - i want to encapsulate them in Enemy.prototype
+//But i can't get that to work, if i put the factory method there i will need to create an enemy object and then access
+//the factory method? This doesn't feel right, so any ideas how i can improve this code architecture?
 function enemyFactory(numberOfEnemies) {
 
     let enemyContainer = [];
     for (let i = 0; i < numberOfEnemies; i++) {
 
-        let newEnemy = new Enemy(101, 59, "images/enemy-bug.png");
+        let newEnemy = new Enemy(randomEnemyXStartValue(), randomEnemyYStartValue(), gameAdjustmentVariables.enemyImage,
+            randomEnemySpeedValue());
         enemyContainer.push(newEnemy);
     }
 
     return enemyContainer;
 }
 
-let randomEnemyXStartValue = function () {
+function randomEnemyXStartValue() {
 
     let startInColumn1 = 0,
         startInColumn2 = 101,
@@ -218,9 +242,9 @@ let randomEnemyXStartValue = function () {
     let randomHorizontalStartPosition = horizontalEnemyStartPositions[randomStartColumn];
 
     return randomHorizontalStartPosition;
-};
+}
 
-let randomEnemyYStartValue = function () {
+function randomEnemyYStartValue() {
 
     let startInUpperRow = 59,
         startInMiddleRow = 142,
@@ -232,17 +256,11 @@ let randomEnemyYStartValue = function () {
     let randomVerticalStartPosition = verticalEnemyStartPositions[randomStartRow];
 
     return randomVerticalStartPosition;
-};
+}
 
-let randomEnemySpeedValue = function () {
+function randomEnemySpeedValue() {
     return 200 + Math.random() * gameAdjustmentVariables.enemySpeed;
 };
-
-let enemyType = function () {
-    let url = "images/enemy-bug.png";
-
-    return url;
-}
 
 document.addEventListener('keyup', function (e) {
     let allowedKeys = {
