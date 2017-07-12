@@ -24,7 +24,7 @@ GameObject.prototype.render = function () {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-GameObject.prototype.objectCollision = function (obj1, obj2) {
+GameObject.prototype.objectsAreColliding = function (obj1, obj2) {
 
     return (obj1.x < obj2.x + obj2.width &&
         obj1.x + obj1.width > obj2.x &&
@@ -89,7 +89,7 @@ Enemy.prototype.respawnEnemy = function (enemy) {
 Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
 
     let enemyPosition = GameObject.prototype.getPosition(this);
-    let playerCollidesWithEnemy = GameObject.prototype.objectCollision(playerPosition, enemyPosition);
+    let playerCollidesWithEnemy = GameObject.prototype.objectsAreColliding(playerPosition, enemyPosition);
 
     if(playerCollidesWithEnemy) {
 
@@ -121,7 +121,7 @@ Player.prototype.update = function () {
     let playerVerticalPosition = GameObject.prototype.getPosition(this).y;
 //BYTTET UT DEN UNDER MED DEN OVER I GÅR
     // let playerVerticalPosition = player.getPosition().y;
-debugger;
+
     if(this.isPlayerInWinningPosition(playerVerticalPosition)) {
         this.playerHasWon();
     }
