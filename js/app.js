@@ -102,6 +102,9 @@ let Player = function (x, y, imageLocation) {
     GameObject.call(this, x, y, imageLocation);
 };
 
+Player.prototype = Object.create(GameObject.prototype);
+Player.prototype.constructor = Player;
+
 Player.prototype.moveToStartPosition = function () {
 
     const playerFixedHorizontalStartPosition = 203;
@@ -115,21 +118,13 @@ Player.prototype.moveToStartPosition = function () {
 
 Player.prototype.update = function () {
 
-    let playerVerticalPosition = player.getPosition().y;
-
+    let playerVerticalPosition = GameObject.prototype.getPosition(this).y;
+//BYTTET UT DEN UNDER MED DEN OVER I GÅR
+    // let playerVerticalPosition = player.getPosition().y;
+debugger;
     if(this.isPlayerInWinningPosition(playerVerticalPosition)) {
         this.playerHasWon();
     }
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-
-    //QUESTION: What is the point of multiplying movement of player? Player teleports?
-    //The way the engine is implemented it does not pass a dt parameter to player, only enemy
-};
-//QUESTION: If i remove this method player should fall back to GameObject.prototype.render (works with enemy). But it breaks the game, why?
-Player.prototype.render = function () {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
 Player.prototype.handleInput = function (keyInput) {
@@ -172,18 +167,6 @@ Player.prototype.handleInput = function (keyInput) {
         }
 
     }
-};
-//QUESTION: Cannot remove this method either, something is wrong with player fallback to GameObject prototype methods i think
-Player.prototype.getPosition = function () {
-
-    let playerPosition = {
-        x: this.x,
-        y: this.y,
-        width: gameAdjustmentVariables.gameObjectWidth,
-        height: gameAdjustmentVariables.gameObjectHeight
-    };
-
-    return playerPosition;
 };
 
 Player.prototype.isPlayerInWinningPosition = function (currentVerticalPosition) {
