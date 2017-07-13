@@ -1,10 +1,13 @@
 # Frogger Arcade Game
-In order to change game parameters, open <game-folder>/js/app.js. Adjustments can be done in the gameAdjustmentVariables object, on top of the page. The following parameters can be adjusted:
 
-* Number of enemies ("numberOfEnemies") (default: 5)
-* Type of enemy image ("enemyImage") (default: "images/enemy-bug.png")
-* Horizontal spawn point for enemies (enemyStartPositionX) (default: random value from function randomEnemyXStartValue())
-* Vertical spawn point for enemies (enemyStartPositionY) (default: random value from function randomEnemyYStartValue())
-* Enemy speed modifier ("enemySpeed") (default: 450)
-* Horizontal spawn point for player (playerStartPositionX) (default: 203 (center of canvas))
-* Vertical spawn point for player (playerStartPositionY) (default: 405 (lowermost part of canvas)
+This is my version of the classic Frogger game. The project is part of Udacitys Front-End Web Developer Nanodegree, which provided the game engine and graphic resources. The goal of the game is for the player to reach a water tile without getting hit by the enemy.
+
+---
+### Starting the game:
+
+In the project folder, open "index.html" in a web browser. Alternatively, the game is uploaded and can be played here: https://ovsundal.github.io/frontend-nanodegree-arcade-game/
+
+### Navigating the game:
+
+Use arrow keys (up, down, left, right) to navigate.
+
