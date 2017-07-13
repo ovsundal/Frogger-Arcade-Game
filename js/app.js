@@ -12,27 +12,25 @@ let gameAdjustmentVariables = {
     playerStartPositionY: 405,
     playerImage: "images/char-boy.png",
 
-    //QUESTION FOR REVIEWER is there a better way to extract width and height from any png? Collision detection works okay,
-    // but without exact width and height it will not be optimal
     gameObjectWidth: 50,
     gameObjectHeight: 50
 };
 
-//GameObject defines game events, updates and creates player/enemy
-let GameObject = function(x, y, imageLocation) {
+//GameMechanics defines game events, updates and creates game objects
+let GameMechanics = function(x, y, imageLocation) {
 
     this.x = x;
     this.y = y;
     this.sprite = imageLocation;
 };
-//first, render page
-GameObject.prototype.render = function () {
+//Am i using the preloaded image from engine correctly here?
+GameMechanics.prototype.render = function () {
 
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+
 };
 
-//then, check if player has collided with enemy
-GameObject.prototype.objectsAreColliding = function (obj1, obj2) {
+GameMechanics.prototype.objectsAreColliding = function (obj1, obj2) {
 
     return (obj1.x < obj2.x + obj2.width &&
         obj1.x + obj1.width > obj2.x &&
@@ -40,16 +38,14 @@ GameObject.prototype.objectsAreColliding = function (obj1, obj2) {
         obj1.height + obj1.y > obj2.y)
     };
 
-//then, check if player is in winning position
-GameObject.prototype.isPlayerInWinningPosition = function(currentVericalPosition) {
+GameMechanics.prototype.isPlayerInWinningPosition = function(currentVericalPosition) {
 
     let winConditionPlayerReachesWater = 72;
 
     return currentVericalPosition < winConditionPlayerReachesWater;
 };
 
-
-GameObject.prototype.getPosition = function(obj) {
+GameMechanics.prototype.getPosition = function(obj) {
 
     let objectPosition = {
         x: obj.x,
@@ -61,12 +57,16 @@ GameObject.prototype.getPosition = function(obj) {
     return objectPosition;
 };
 
-GameObject.prototype.enemyFactory = function(numberOfEnemies) {
+//Should this be a method of enemy? I could not implement it, could not find class if i tried to access it with enemy object
+GameMechanics.prototype.enemyFactory = function(numberOfEnemies) {
 
     let enemyContainer = [];
     for (let i = 0; i < numberOfEnemies; i++) {
-        debugger;
-        let newEnemy = new Enemy(this.getRandomCol(), this.getRandomRow(), gameAdjustmentVariables.enemyImage,
+
+        //QUESTION FOR REVIEWER: How can i load the image from the Resource object as the third parameter in newEnemy?
+        // Resources.get('images/enemy-bug.png') doesn't work, why?
+
+        let newEnemy = new Enemy(this.getRandomCol(), this.getRandomRow(), "images/enemy-bug.png",
             this.getRandomSpeed());
         enemyContainer.push(newEnemy);
     }
@@ -74,7 +74,7 @@ GameObject.prototype.enemyFactory = function(numberOfEnemies) {
     return enemyContainer;
 };
 
-GameObject.prototype.getRandomCol = function () {
+GameMechanics.prototype.getRandomCol = function () {
 
     let startInColumn1 = 0,
         startInColumn2 = 101,
@@ -92,7 +92,7 @@ GameObject.prototype.getRandomCol = function () {
     return randomCol;
 };
 
-GameObject.prototype.getRandomRow = function() {
+GameMechanics.prototype.getRandomRow = function() {
 
     let startInUpperRow = 59,
         startInMiddleRow = 142,
@@ -106,26 +106,21 @@ GameObject.prototype.getRandomRow = function() {
     return randomRow;
 };
 
-GameObject.prototype.getRandomSpeed = function () {
+GameMechanics.prototype.getRandomSpeed = function () {
 
     return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
 };
 
 
-//Should this be a method of enemy? I could not implement it, could not find class if i tried to access it with enemy object
-
-
-
-
 let Enemy = function (x, y, imageLocation, speed) {
 
-    GameObject.call(this, x, y, imageLocation);
+    GameMechanics.call(this, x, y, imageLocation);
 
     this.isActive = true;
     this.speed = speed;
 };
 
-Enemy.prototype = Object.create(GameObject.prototype);
+Enemy.prototype = Object.create(GameMechanics.prototype);
 
 Enemy.prototype.constructor = Enemy;
 
@@ -149,18 +144,18 @@ Enemy.prototype.update = function (dt) {
 Enemy.prototype.respawnEnemy = function (enemy) {
 
     const startPosition = -250;
-debugger;
+
     if(enemy.isActive) {
         enemy.x = startPosition;
-        enemy.y = GameObject.prototype.getRandomRow();
-        enemy.speed = GameObject.prototype.getRandomSpeed();
+        enemy.y = GameMechanics.prototype.getRandomRow();
+        enemy.speed = GameMechanics.prototype.getRandomSpeed();
     }
 };
 
 Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
 
-    let enemyPosition = GameObject.prototype.getPosition(this);
-    let playerCollidesWithEnemy = GameObject.prototype.objectsAreColliding(playerPosition, enemyPosition);
+    let enemyPosition = GameMechanics.prototype.getPosition(this);
+    let playerCollidesWithEnemy = GameMechanics.prototype.objectsAreColliding(playerPosition, enemyPosition);
 
     if(playerCollidesWithEnemy) {
 
@@ -168,12 +163,22 @@ Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
     }
 };
 
-let Player = function (x, y, imageLocation) {
+let Player = function (x, y, imageLocation, life) {
 
-    GameObject.call(this, x, y, imageLocation);
+    GameMechanics.call(this, x, y, imageLocation);
+    this.life = life;
 };
 
-Player.prototype = Object.create(GameObject.prototype);
+//QUESTION: How to call this method and prevent fallback to GameObject? I thought line 160 in engine.js would call this,
+//but it calls GameMechanics.prototype.render
+Player.prototype.render = function () {
+
+    debugger;
+    this.lifeBar();
+
+};
+
+Player.prototype = Object.create(GameMechanics.prototype);
 
 Player.prototype.constructor = Player;
 
@@ -187,8 +192,8 @@ Player.prototype.moveToStartPosition = function () {
 //Check if player has won (stands on water tile)
 Player.prototype.update = function () {
 
-    let playerVerticalPosition = GameObject.prototype.getPosition(this).y;
-    let playerIsInWinningPosition = GameObject.prototype.isPlayerInWinningPosition(playerVerticalPosition);
+    let playerVerticalPosition = GameMechanics.prototype.getPosition(this).y;
+    let playerIsInWinningPosition = GameMechanics.prototype.isPlayerInWinningPosition(playerVerticalPosition);
 
     if(playerIsInWinningPosition) {
 
@@ -199,10 +204,24 @@ Player.prototype.update = function () {
     }
 };
 
+Player.prototype.lifeBar = function() {
+
+    let numberOfLives = this.life;
+    let lifeImage = new Image();
+
+    lifeImage.src = Resources.get("images/Heart.png");
+
+    lifeImage.src = "images/Heart.png";
+
+    for(let i = 0; i < numberOfLives; i++) {
+
+        ctx.drawImage(lifeImage, i * 30, 540, 30, 50);
+    }
+};
+
 //condition that triggers when player reaches water tile
 Player.prototype.playerHasWon = function () {
 
-    //QUESTION FOR REVIEWER: If i put despawnEnemies inside Enemy.prototype, how would i call it here, inside Player prototype?
     despawnEnemies(allEnemies);
 };
 
@@ -261,7 +280,7 @@ Player.prototype.handleInput = function (keyInput) {
 
 let allEnemies = new Enemy();
 let player = new Player(gameAdjustmentVariables.playerStartPositionX, gameAdjustmentVariables.playerStartPositionY,
-    gameAdjustmentVariables.playerImage);
+    gameAdjustmentVariables.playerImage, 3);
 let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 
 allEnemies = allEnemies.enemyFactory(numberOfEnemies);
