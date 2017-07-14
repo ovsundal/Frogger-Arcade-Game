@@ -12,7 +12,7 @@ let gameAdjustmentVariables = {
     playerStartPositionY: 405,
     playerImage: "images/char-boy.png",
 
-    gameObjectWidth: 50,
+    gameObjectWidth: 70,
     gameObjectHeight: 50
 };
 
@@ -29,6 +29,7 @@ GameMechanics.prototype.render = function () {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 
 };
+
 
 GameMechanics.prototype.objectsAreColliding = function (obj1, obj2) {
 
@@ -55,23 +56,6 @@ GameMechanics.prototype.getPosition = function(obj) {
     };
 
     return objectPosition;
-};
-
-//Should this be a method of enemy? I could not implement it, could not find class if i tried to access it with enemy object
-GameMechanics.prototype.enemyFactory = function(numberOfEnemies) {
-
-    let enemyContainer = [];
-    for (let i = 0; i < numberOfEnemies; i++) {
-
-        //QUESTION FOR REVIEWER: How can i load the image from the Resource object as the third parameter in newEnemy?
-        // Resources.get('images/enemy-bug.png') doesn't work, why?
-
-        let newEnemy = new Enemy(this.getRandomCol(), this.getRandomRow(), "images/enemy-bug.png",
-            this.getRandomSpeed());
-        enemyContainer.push(newEnemy);
-    }
-
-    return enemyContainer;
 };
 
 GameMechanics.prototype.getRandomCol = function () {
@@ -111,7 +95,6 @@ GameMechanics.prototype.getRandomSpeed = function () {
     return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
 };
 
-
 let Enemy = function (x, y, imageLocation, speed) {
 
     GameMechanics.call(this, x, y, imageLocation);
@@ -123,6 +106,24 @@ let Enemy = function (x, y, imageLocation, speed) {
 Enemy.prototype = Object.create(GameMechanics.prototype);
 
 Enemy.prototype.constructor = Enemy;
+
+Enemy.prototype.enemyFactory = function(numberOfEnemies) {
+
+    let enemyContainer = [];
+    for (let i = 0; i < numberOfEnemies; i++) {
+
+        //QUESTION FOR REVIEWER: How can i load the image from the Resource object as the third parameter in newEnemy?
+        // Resources.get('images/enemy-bug.png') doesn't work, why? This is inside a prototype method, so image should be done
+        //loading when it executes?
+
+        let newEnemy = new Enemy(this.getRandomCol(), this.getRandomRow(), "images/enemy-bug.png",
+            this.getRandomSpeed());
+        enemyContainer.push(newEnemy);
+    }
+
+    return enemyContainer;
+};
+
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -158,7 +159,8 @@ Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
     let playerCollidesWithEnemy = GameMechanics.prototype.objectsAreColliding(playerPosition, enemyPosition);
 
     if(playerCollidesWithEnemy) {
-
+        debugger;
+        player.loseLife();
         player.moveToStartPosition();
     }
 };
@@ -169,24 +171,20 @@ let Player = function (x, y, imageLocation, life) {
     this.life = life;
 };
 
-//QUESTION: How to call this method and prevent fallback to GameObject? I thought line 160 in engine.js would call this,
-//but it calls GameMechanics.prototype.render
-Player.prototype.render = function () {
-
-    debugger;
-    this.lifeBar();
-
-};
-
 Player.prototype = Object.create(GameMechanics.prototype);
 
 Player.prototype.constructor = Player;
+
+Player.prototype.render = function () {
+
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    this.lifeBar();
+};
 
 Player.prototype.moveToStartPosition = function () {
 
     this.x = gameAdjustmentVariables.playerStartPositionX;
     this.y = gameAdjustmentVariables.playerStartPositionY;
-
 };
 
 //Check if player has won (stands on water tile)
@@ -217,6 +215,11 @@ Player.prototype.lifeBar = function() {
 
         ctx.drawImage(lifeImage, i * 30, 540, 30, 50);
     }
+};
+
+Player.prototype.loseLife = function() {
+
+    return this.life--;
 };
 
 //condition that triggers when player reaches water tile
@@ -279,11 +282,11 @@ Player.prototype.handleInput = function (keyInput) {
 //instantiate objects
 
 let allEnemies = new Enemy();
+let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
+allEnemies = allEnemies.enemyFactory(numberOfEnemies);
 let player = new Player(gameAdjustmentVariables.playerStartPositionX, gameAdjustmentVariables.playerStartPositionY,
     gameAdjustmentVariables.playerImage, 3);
-let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 
-allEnemies = allEnemies.enemyFactory(numberOfEnemies);
 
 document.addEventListener('keyup', function (e) {
     let allowedKeys = {
