@@ -101,10 +101,14 @@ GameMechanics.prototype.checkForPlayerWin = function (player) {
 GameMechanics.prototype.playerWins = function () {
 
     //QUESTION FOR REVIEWER: Is it "okay" to pass in allEnemies from global scope to despawnEnemy?
+    //Is it okay to use enemy or player methods in gamemechanics like this? (Or player methods in enemy methods etc.)
     Enemy.prototype.despawnEnemy(allEnemies);
 
-    console.log("player wins");
+};
 
+GameMechanics.prototype.playerLoses = function (player) {
+
+    player.x = 1000;
 };
 
 let Enemy = function (x, y, imageLocation, speed) {
@@ -170,9 +174,10 @@ Enemy.prototype.respawnEnemy = function (enemy) {
 };
 
 Enemy.prototype.despawnEnemy = function (allEnemies) {
-debugger;
+
     allEnemies.forEach(function(enemy) {
-        enemy.x = 1000;
+        enemy.x = -1000;
+        enemy.speed = 0;
     });
 
 };
@@ -215,9 +220,10 @@ Player.prototype.update = function () {
 
     Player.prototype.checkForPlayerWin(this);
 
+    if(this.life < 1) {
+        GameMechanics.prototype.playerLoses(this);
+    }
 };
-
-
 
 Player.prototype.lifeBar = function() {
 
@@ -238,16 +244,6 @@ Player.prototype.loseLife = function() {
 
     return this.life--;
 };
-
-//removes all enemies by setting their x value outside of canvas, and prevent respawn by setting isActive = false
-function despawnEnemies(allEnemies) {
-
-    //remove enemies by setting their x value outside the canvas
-    allEnemies.forEach(function(enemy) {
-        enemy.x = 1000;
-        enemy.isActive = false;
-    });
-}
 
 Player.prototype.handleInput = function (keyInput) {
 
