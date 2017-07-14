@@ -98,7 +98,10 @@ GameMechanics.prototype.checkForPlayerWin = function (player) {
     }
 };
 
-GameMechanics.prototype.playerWins = function (allEnemies) {
+GameMechanics.prototype.playerWins = function () {
+
+    //QUESTION FOR REVIEWER: Is it "okay" to pass in allEnemies from global scope to despawnEnemy?
+    Enemy.prototype.despawnEnemy(allEnemies);
 
     console.log("player wins");
 
@@ -133,7 +136,6 @@ Enemy.prototype.enemyFactory = function(numberOfEnemies) {
     return enemyContainer;
 };
 
-
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function (dt) {
@@ -167,7 +169,13 @@ Enemy.prototype.respawnEnemy = function (enemy) {
     }
 };
 
+Enemy.prototype.despawnEnemy = function (allEnemies) {
+debugger;
+    allEnemies.forEach(function(enemy) {
+        enemy.x = 1000;
+    });
 
+};
 
 Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
 
