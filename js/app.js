@@ -138,8 +138,13 @@ Enemy.prototype.enemyFactory = function(numberOfEnemies) {
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function (dt) {
 
-    const canvasLength = 505;
+    this.moveEnemies(dt);
 
+};
+
+Enemy.prototype.moveEnemies = function (dt) {
+
+    const canvasLength = 505;
     let currentHorizontalPosition = this.x;
 
     if (currentHorizontalPosition > canvasLength) {
@@ -161,6 +166,8 @@ Enemy.prototype.respawnEnemy = function (enemy) {
         enemy.speed = GameMechanics.prototype.getRandomSpeed();
     }
 };
+
+
 
 Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
 
@@ -196,10 +203,9 @@ Player.prototype.moveToStartPosition = function () {
     this.y = gameAdjustmentVariables.playerStartPositionY;
 };
 
-//Check if player has won (stands on water tile)
 Player.prototype.update = function () {
 
-    GameMechanics.prototype.checkForPlayerWin(this);
+    Player.prototype.checkForPlayerWin(this);
 
 };
 
