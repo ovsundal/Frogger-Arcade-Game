@@ -30,7 +30,6 @@ GameMechanics.prototype.render = function () {
 
 };
 
-
 GameMechanics.prototype.objectsAreColliding = function (obj1, obj2) {
 
     return (obj1.x < obj2.x + obj2.width &&
@@ -38,13 +37,6 @@ GameMechanics.prototype.objectsAreColliding = function (obj1, obj2) {
         obj1.y < obj2.y + obj2.height &&
         obj1.height + obj1.y > obj2.y)
     };
-
-GameMechanics.prototype.isPlayerInWinningPosition = function(currentVericalPosition) {
-
-    let winConditionPlayerReachesWater = 72;
-
-    return currentVericalPosition < winConditionPlayerReachesWater;
-};
 
 GameMechanics.prototype.getPosition = function(obj) {
 
@@ -93,6 +85,23 @@ GameMechanics.prototype.getRandomRow = function() {
 GameMechanics.prototype.getRandomSpeed = function () {
 
     return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
+};
+
+GameMechanics.prototype.checkForPlayerWin = function (player) {
+
+    let playerVerticalPosition = player.y;
+    let winConditionPlayerReachesWater = 72;
+
+    if(playerVerticalPosition < winConditionPlayerReachesWater) {
+
+        this.playerWins();
+    }
+};
+
+GameMechanics.prototype.playerWins = function (allEnemies) {
+
+    console.log("player wins");
+
 };
 
 let Enemy = function (x, y, imageLocation, speed) {
@@ -159,7 +168,7 @@ Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
     let playerCollidesWithEnemy = GameMechanics.prototype.objectsAreColliding(playerPosition, enemyPosition);
 
     if(playerCollidesWithEnemy) {
-        debugger;
+
         player.loseLife();
         player.moveToStartPosition();
     }
@@ -190,17 +199,11 @@ Player.prototype.moveToStartPosition = function () {
 //Check if player has won (stands on water tile)
 Player.prototype.update = function () {
 
-    let playerVerticalPosition = GameMechanics.prototype.getPosition(this).y;
-    let playerIsInWinningPosition = GameMechanics.prototype.isPlayerInWinningPosition(playerVerticalPosition);
+    GameMechanics.prototype.checkForPlayerWin(this);
 
-    if(playerIsInWinningPosition) {
-
-    }
-    if(this.isPlayerInWinningPosition(playerVerticalPosition)) {
-
-        this.playerHasWon();
-    }
 };
+
+
 
 Player.prototype.lifeBar = function() {
 
@@ -220,12 +223,6 @@ Player.prototype.lifeBar = function() {
 Player.prototype.loseLife = function() {
 
     return this.life--;
-};
-
-//condition that triggers when player reaches water tile
-Player.prototype.playerHasWon = function () {
-
-    despawnEnemies(allEnemies);
 };
 
 //removes all enemies by setting their x value outside of canvas, and prevent respawn by setting isActive = false
