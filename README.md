@@ -11,3 +11,8 @@ In the project folder, open "index.html" in a web browser. Alternatively, the ga
 
 Use arrow keys (up, down, left, right) to navigate.
 
+### Game rules:
+
+Player starts with 3 lifes. If player has 0 lifes left, he will despawn and lose the game.
+
+If player manages to reach any of the water tiles, the enemies will despawn and player will win the game.
