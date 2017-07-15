@@ -5,11 +5,11 @@ let gameAdjustmentVariables = {
     numberOfEnemies: 5,
     enemyImage: "images/enemy-bug.png",
 
-    enemySpeed: 150,
+    // enemySpeed: 150,
 
     playerStartPositionX: 203,
     playerStartPositionY: 405,
-    playerImage: "images/char-boy.png",
+    playerImage: "images/char-boy.png"
 
 };
 
@@ -37,10 +37,10 @@ GameMechanics.prototype.objectsAreColliding = function (obj1) {
         obj1.height + obj1.y > this.y)
     };
 
-GameMechanics.prototype.getRandomSpeed = function () {
-
-    return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
-};
+// GameMechanics.prototype.getRandomSpeed = function () {
+//
+//     return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
+// };
 
 GameMechanics.prototype.checkForPlayerWin = function (player) {
 
@@ -147,16 +147,21 @@ Enemy.prototype.hasCollisionWithPlayer = function (player) {
 
 Enemy.prototype.getRandomCol = function () {
 
-    let startInColumn1 = 0,
-        startInColumn2 = 101,
-        startInColumn3 = 202,
-        startInColumn4 = 303,
-        startInColumn5 = 404,
-        startInColumn6 = 505,
-        startInColumn7 = 606;
-    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
-        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
+    const START_IN_COL_1 = 0,
+        START_IN_COL_2 = 101,
+        START_IN_COL_3 = 202,
+        START_IN_COL_4 = 303,
+        START_IN_COL_5 = 404,
+        START_IN_COL_6 = 505,
+        START_IN_COL_7 = 606;
+    let horizontalEnemyStartPositions = [START_IN_COL_1, START_IN_COL_2,
+        START_IN_COL_3, START_IN_COL_4, START_IN_COL_5, START_IN_COL_6, START_IN_COL_7
     ];
+
+    //Question for reviewer: I prefer to declare variables like randomStartColumn for added clarity in my code
+    //I could of course pass horizontalEnemyStartPositions[Math.floor(Math.random() * 7)] into randomCol, would that
+    //be better? It is more efficient, but i feel its easier to quickly understand what is going on by using one extra
+    //layer of description
     let randomStartColumn = Math.floor(Math.random() * 7);
     let randomCol = horizontalEnemyStartPositions[randomStartColumn];
 
@@ -165,16 +170,23 @@ Enemy.prototype.getRandomCol = function () {
 
 Enemy.prototype.getRandomRow = function() {
 
-    let startInUpperRow = 59,
-        startInMiddleRow = 142,
-        startInLowerRow = 225;
-    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
-        startInLowerRow
+    const UPPER_ROW = 59, MIDDLE_ROW = 142,
+        LOWER_ROW = 225;
+    let verticalEnemyStartPositions = [UPPER_ROW, MIDDLE_ROW,
+        LOWER_ROW
     ];
     let randomStartRow = Math.floor(Math.random() * 3);
     let randomRow = verticalEnemyStartPositions[randomStartRow];
 
     return randomRow;
+};
+
+Enemy.prototype.getRandomSpeed = function () {
+
+    const BASE_SPEED = 150;
+    const VARIABLE_SPEED = 150;
+
+    return BASE_SPEED + Math.random() * VARIABLE_SPEED;
 };
 
 
