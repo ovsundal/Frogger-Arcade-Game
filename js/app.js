@@ -2,15 +2,17 @@
 
 let gameAdjustmentVariables = {
 
-    numberOfEnemies: 5,
+    numberOfEnemies: 7,
     enemyImage: "images/enemy-bug.png",
 
-    playerLifes: 3,
-    playerImage: "images/char-boy.png"
+    playerLifes: 4,
+    playerImage: "images/char-boy.png",
+
+    gemImage: "images/Gem Blue"
 };
 
 //GameMechanics defines game events, updates and creates game objects
-let GameMechanics = function(x, y, imageLocation) {
+let GameMechanics = function (x, y, imageLocation) {
 
     this.x = x;
     this.y = y;
@@ -27,10 +29,45 @@ GameMechanics.prototype.render = function () {
 GameMechanics.prototype.objectsAreColliding = function (obj1) {
 
     return (obj1.x < this.x + this.width &&
-        obj1.x + obj1.width > this.x &&
-        obj1.y < this.y + this.height &&
-        obj1.height + obj1.y > this.y)
-    };
+    obj1.x + obj1.width > this.x &&
+    obj1.y < this.y + this.height &&
+    obj1.height + obj1.y > this.y)
+};
+
+GameMechanics.prototype.getRandomCol = function () {
+
+    const START_IN_COL_1 = 0,
+        START_IN_COL_2 = 101,
+        START_IN_COL_3 = 202,
+        START_IN_COL_4 = 303,
+        START_IN_COL_5 = 404;
+
+    let horizontalEnemyStartPositions = [START_IN_COL_1, START_IN_COL_2,
+        START_IN_COL_3, START_IN_COL_4, START_IN_COL_5
+    ];
+
+    //Question for reviewer: I prefer to declare variables like randomStartColumn for added clarity in my code
+    //I could of course pass horizontalEnemyStartPositions[Math.floor(Math.random() * 7)] into randomCol, would that
+    //be better? It is more efficient, but i feel its easier to quickly understand what is going on by using one extra
+    //layer of description
+    let randomStartColumn = Math.floor(Math.random() * 7);
+    let randomCol = horizontalEnemyStartPositions[randomStartColumn];
+
+    return randomCol;
+};
+
+GameMechanics.prototype.getRandomRow = function () {
+
+    const UPPER_ROW = 59, MIDDLE_ROW = 142,
+        LOWER_ROW = 225;
+    let verticalEnemyStartPositions = [UPPER_ROW, MIDDLE_ROW,
+        LOWER_ROW
+    ];
+    let randomStartRow = Math.floor(Math.random() * 3);
+    let randomRow = verticalEnemyStartPositions[randomStartRow];
+
+    return randomRow;
+};
 
 let Enemy = function () {
 
@@ -42,7 +79,6 @@ let Enemy = function () {
 
     GameMechanics.call(this, enemyStartCol, enemyStartRow, enemyImage);
 
-    this.isActive = true;
     this.speed = this.getRandomSpeed();
 };
 
@@ -75,56 +111,19 @@ Enemy.prototype.respawnEnemy = function () {
 
     const startPosition = -250;
 
-    if(this.isActive) {
-        this.x = startPosition;
-        this.y = this.getRandomRow();
-        this.speed = this.getRandomSpeed();
-    }
+    this.x = startPosition;
+    this.y = this.getRandomRow();
+    this.speed = this.getRandomSpeed();
+
 };
 
 Enemy.prototype.hasCollisionWithPlayer = function (player) {
 
-    if(this.objectsAreColliding(player)) {
+    if (this.objectsAreColliding(player)) {
 
         player.life--;
         player.moveToStartPosition();
     }
-};
-
-Enemy.prototype.getRandomCol = function () {
-
-    const START_IN_COL_1 = 0,
-        START_IN_COL_2 = 101,
-        START_IN_COL_3 = 202,
-        START_IN_COL_4 = 303,
-        START_IN_COL_5 = 404,
-        START_IN_COL_6 = 505,
-        START_IN_COL_7 = 606;
-    let horizontalEnemyStartPositions = [START_IN_COL_1, START_IN_COL_2,
-        START_IN_COL_3, START_IN_COL_4, START_IN_COL_5, START_IN_COL_6, START_IN_COL_7
-    ];
-
-    //Question for reviewer: I prefer to declare variables like randomStartColumn for added clarity in my code
-    //I could of course pass horizontalEnemyStartPositions[Math.floor(Math.random() * 7)] into randomCol, would that
-    //be better? It is more efficient, but i feel its easier to quickly understand what is going on by using one extra
-    //layer of description
-    let randomStartColumn = Math.floor(Math.random() * 7);
-    let randomCol = horizontalEnemyStartPositions[randomStartColumn];
-
-    return randomCol;
-};
-
-Enemy.prototype.getRandomRow = function() {
-
-    const UPPER_ROW = 59, MIDDLE_ROW = 142,
-        LOWER_ROW = 225;
-    let verticalEnemyStartPositions = [UPPER_ROW, MIDDLE_ROW,
-        LOWER_ROW
-    ];
-    let randomStartRow = Math.floor(Math.random() * 3);
-    let randomRow = verticalEnemyStartPositions[randomStartRow];
-
-    return randomRow;
 };
 
 Enemy.prototype.getRandomSpeed = function () {
@@ -188,18 +187,18 @@ Player.prototype.checkForPlayerWin = function () {
     let playerVerticalPosition = this.y;
     let playerWins = (playerVerticalPosition < WATER_VERTICAL_POSITION);
 
-    if(playerWins) {
+    if (playerWins) {
 
         //move all enemies outside of canvas and set speed to 0
-        allEnemies.forEach(function(enemy) {
+        allEnemies.forEach(function (enemy) {
             enemy.x = -100;
             enemy.speed = 0;
 
         });
 
         ctx.font = "50px Arial";
-        ctx.textAlign="center";
-        ctx.fillText("Player wins!",252,303);
+        ctx.textAlign = "center";
+        ctx.fillText("Player wins!", 252, 303);
 
         //Question for reviewer: I want to terminate the game here, or call the reset function in engine.
         // Do i just make engine a global object and call it with Engine.reset()?
@@ -209,23 +208,26 @@ Player.prototype.checkForPlayerWin = function () {
 
 Player.prototype.checkForPlayerDeath = function () {
 
-    if(this.life < 1) {
+    if (this.life < 1) {
         this.x = -100;
 
         ctx.font = "50px Arial";
-        ctx.textAlign="center";
-        ctx.fillText("Game Over!",252,303);
+        ctx.textAlign = "center";
+        ctx.fillText("Game Over!", 252, 303);
     }
 };
 
-Player.prototype.lifeBar = function() {
+Player.prototype.lifeBar = function () {
 
     let numberOfLives = this.life;
     let lifeImage = new Image();
 
     lifeImage.src = "images/Heart.png";
 
-    for(let i = 0; i < numberOfLives; i++) {
+    //Why doesn't this work? It's inside a prototype method?
+    // lifeImage.src = Resources.get("images/Heart.png");
+
+    for (let i = 0; i < numberOfLives; i++) {
 
         ctx.drawImage(lifeImage, i * 30, 540, 30, 50);
     }
@@ -272,6 +274,22 @@ Player.prototype.handleInput = function (keyInput) {
     }
 };
 
+let Gem = function () {
+
+    let gemPlacementCol = this.getRandomCol(),
+        gemPlacementRow = this.getRandomRow(),
+        gemImage = new Image();
+
+    //Question: What am i doing wrong here? Why can't the engine render the gem image?
+    gemImage.src = "images/Gem Blue.png";
+
+    GameMechanics.call(this, gemPlacementCol, gemPlacementRow, gemImage);
+};
+
+Gem.prototype = Object.create(GameMechanics.prototype);
+
+Gem.prototype.constructor = Gem;
+
 //instantiate objects
 //create enemies
 let allEnemies = generateEnemies();
@@ -279,7 +297,7 @@ let allEnemies = generateEnemies();
 function generateEnemies() {
 
     let enemies = [],
-    numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
+        numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
 
     for (let i = 0; i < numberOfEnemies; i++) {
         let newEnemy = new Enemy();
@@ -290,6 +308,9 @@ function generateEnemies() {
 
 //create player
 let player = new Player();
+
+//create gem
+let gem = new Gem();
 
 document.addEventListener('keyup', function (e) {
     let allowedKeys = {
