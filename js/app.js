@@ -111,12 +111,18 @@ Enemy.prototype.respawnEnemy = function () {
 
 };
 
-Enemy.prototype.hasCollisionWithPlayer = function (player) {
+GameMechanics.prototype.hasCollisionWithPlayer = function (player) {
 
     if (this.objectsAreColliding(player)) {
-
-        player.life--;
-        player.moveToStartPosition();
+        //if player picks up gem
+        if(this instanceof Gem) {
+            player.score += 10;
+            this.move();
+            //if player collides with enemy
+        } else {
+            player.life--;
+            player.moveToStartPosition();
+        }
     }
 };
 
@@ -193,13 +199,23 @@ Player.prototype.checkForPlayerWin = function () {
 
         });
 
+        //Canvas does not support newline (\n) - quick fix:
+        let message = ["Player wins!", "Score: " + this.score],
+            yValue = 303;
+
         ctx.font = "50px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("Player wins!", 252, 303);
 
-        //Question for reviewer: I want to terminate the game here, or call the reset function in engine.
-        // Do i just make engine a global object and call it with Engine.reset()?
+        for(let i = 0; i < message.length; i++) {
+            ctx.fillText(message[i], 252, yValue);
+            yValue += 50;
+        }
+        //Question for reviewer: I want to terminate the game here (while still showing the screen), or call the reset
+        // function in engine. Do i just make engine a global object and call it with Engine.reset()? If i don't do
+        //anything the game is just gonna keep on increasing player score
 
+        //i'm sure this is not the way to do it, but i'm clueless as to how i can stop the script
+        throw "";
     }
 };
 
@@ -211,6 +227,8 @@ Player.prototype.checkForPlayerDeath = function () {
         ctx.font = "50px Arial";
         ctx.textAlign = "center";
         ctx.fillText("Game Over!", 252, 303);
+
+        throw "";
     }
 };
 
@@ -279,6 +297,10 @@ Player.prototype.handleInput = function (keyInput) {
     }
 };
 
+Player.prototype.collectGem = function () {
+
+}
+
 
 let Gem = function () {
 
@@ -291,6 +313,13 @@ let Gem = function () {
 Gem.prototype = Object.create(GameMechanics.prototype);
 
 Gem.prototype.constructor = Gem;
+
+//When gem has been collected, move it to another random spot on game board
+Gem.prototype.move = function () {
+
+    this.x = this.getRandomCol();
+    this.y = this.getRandomRow();
+}
 
 //instantiate objects
 //create enemies

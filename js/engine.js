@@ -101,6 +101,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.hasCollisionWithPlayer(player);
         })
+        gem.hasCollisionWithPlayer(player);
     }
 
     /* This function initially draws the "game level", it will then call
