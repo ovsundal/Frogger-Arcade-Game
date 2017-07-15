@@ -139,6 +139,7 @@ let Player = function () {
     GameMechanics.call(this, x, y, playerImage);
 
     this.life = gameAdjustmentVariables.playerLifes;
+    this.score = 0;
     this.moveToStartPosition();
 };
 
@@ -150,6 +151,7 @@ Player.prototype.render = function () {
 
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     this.lifeBar();
+    this.scoreBar();
 
     //Question for reviewer: I want to write some text and despawn enemies when player wins. Is it correct to put that
     //the checkForPlayerWin in the render method? Or should it be put in update method?
@@ -183,6 +185,7 @@ Player.prototype.checkForPlayerWin = function () {
 
     if (playerWins) {
 
+        this.score += 50;
         //move all enemies outside of canvas and set speed to 0
         allEnemies.forEach(function (enemy) {
             enemy.x = -100;
@@ -227,6 +230,14 @@ Player.prototype.lifeBar = function () {
     }
 };
 
+Player.prototype.scoreBar = function () {
+
+    ctx.font = "15px Arial";
+    ctx.textAlign = "left";
+    ctx.fillText("Score:" + this.score, 410, 70);
+
+}
+
 Player.prototype.handleInput = function (keyInput) {
 
     const minAllowedMovementWest = 101;
@@ -267,6 +278,7 @@ Player.prototype.handleInput = function (keyInput) {
 
     }
 };
+
 
 let Gem = function () {
 
