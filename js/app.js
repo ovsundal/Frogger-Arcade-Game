@@ -274,12 +274,18 @@ Player.prototype.handleInput = function (keyInput) {
 
 //instantiate objects
 //create enemies
-let allEnemies = [];
-let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
-for (let i = 0; i < numberOfEnemies; i++) {
+let allEnemies = generateEnemies();
 
-    let newEnemy = new Enemy();
-    allEnemies.push(newEnemy);
+function generateEnemies() {
+
+    let enemies = [],
+    numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
+
+    for (let i = 0; i < numberOfEnemies; i++) {
+        let newEnemy = new Enemy();
+        enemies.push(newEnemy);
+    }
+    return enemies;
 }
 
 //create player
