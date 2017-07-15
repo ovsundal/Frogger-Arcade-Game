@@ -8,7 +8,7 @@ let gameAdjustmentVariables = {
     playerLifes: 4,
     playerImage: "images/char-boy.png",
 
-    gemImage: "images/Gem Blue"
+    gemImage: "images/Gem Blue.png"
 };
 
 //GameMechanics defines game events, updates and creates game objects
@@ -46,14 +46,9 @@ GameMechanics.prototype.getRandomCol = function () {
         START_IN_COL_3, START_IN_COL_4, START_IN_COL_5
     ];
 
-    //Question for reviewer: I prefer to declare variables like randomStartColumn for added clarity in my code
-    //I could of course pass horizontalEnemyStartPositions[Math.floor(Math.random() * 7)] into randomCol, would that
-    //be better? It is more efficient, but i feel its easier to quickly understand what is going on by using one extra
-    //layer of description
-    let randomStartColumn = Math.floor(Math.random() * 7);
-    let randomCol = horizontalEnemyStartPositions[randomStartColumn];
+    let randomStartColumn = Math.floor(Math.random() * 5);
 
-    return randomCol;
+    return horizontalEnemyStartPositions[randomStartColumn];
 };
 
 GameMechanics.prototype.getRandomRow = function () {
@@ -64,9 +59,8 @@ GameMechanics.prototype.getRandomRow = function () {
         LOWER_ROW
     ];
     let randomStartRow = Math.floor(Math.random() * 3);
-    let randomRow = verticalEnemyStartPositions[randomStartRow];
 
-    return randomRow;
+    return verticalEnemyStartPositions[randomStartRow];
 };
 
 let Enemy = function () {
@@ -277,13 +271,9 @@ Player.prototype.handleInput = function (keyInput) {
 let Gem = function () {
 
     let gemPlacementCol = this.getRandomCol(),
-        gemPlacementRow = this.getRandomRow(),
-        gemImage = new Image();
+        gemPlacementRow = this.getRandomRow();
 
-    //Question: What am i doing wrong here? Why can't the engine render the gem image?
-    gemImage.src = "images/Gem Blue.png";
-
-    GameMechanics.call(this, gemPlacementCol, gemPlacementRow, gemImage);
+    GameMechanics.call(this, gemPlacementCol, gemPlacementRow, gameAdjustmentVariables.gemImage);
 };
 
 Gem.prototype = Object.create(GameMechanics.prototype);
