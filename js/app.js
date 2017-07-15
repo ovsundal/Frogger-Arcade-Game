@@ -5,13 +5,8 @@ let gameAdjustmentVariables = {
     numberOfEnemies: 5,
     enemyImage: "images/enemy-bug.png",
 
-    // enemySpeed: 150,
-
-    playerStartPositionX: 203,
-    playerStartPositionY: 405,
-    playerImage: "images/char-boy.png",
-    playerLifes: 3
-
+    playerLifes: 3,
+    playerImage: "images/char-boy.png"
 };
 
 //GameMechanics defines game events, updates and creates game objects
@@ -68,7 +63,7 @@ Enemy.prototype.moveEnemies = function (dt) {
     let currentHorizontalPosition = this.x;
 
     if (currentHorizontalPosition > canvasLength) {
-        Enemy.prototype.respawnEnemy(this);
+        this.respawnEnemy();
     } else {
         this.x += this.speed * dt;
     }
@@ -76,14 +71,14 @@ Enemy.prototype.moveEnemies = function (dt) {
 
 //Respawns enemy. Added randomization by letting enemy respawn outside of canvas with a new speed value (takes a random
 // amount of time to reach canvas).
-Enemy.prototype.respawnEnemy = function (enemy) {
+Enemy.prototype.respawnEnemy = function () {
 
     const startPosition = -250;
 
-    if(enemy.isActive) {
-        enemy.x = startPosition;
-        enemy.y = this.getRandomRow();
-        enemy.speed = this.getRandomSpeed();
+    if(this.isActive) {
+        this.x = startPosition;
+        this.y = this.getRandomRow();
+        this.speed = this.getRandomSpeed();
     }
 };
 
@@ -140,7 +135,6 @@ Enemy.prototype.getRandomSpeed = function () {
     return BASE_SPEED + Math.random() * VARIABLE_SPEED;
 };
 
-
 let Player = function () {
 
     //Question for reviewer: Should i be doing this in the constructor (pass in nothing, and declare & use
@@ -167,8 +161,11 @@ Player.prototype.render = function () {
 
 Player.prototype.moveToStartPosition = function () {
 
-    this.x = gameAdjustmentVariables.playerStartPositionX;
-    this.y = gameAdjustmentVariables.playerStartPositionY;
+    const PLAYER_START_POSITION_X = 203;
+    const PLAYER_START_POSITION_Y = 405;
+
+    this.x = PLAYER_START_POSITION_X;
+    this.y = PLAYER_START_POSITION_Y;
 };
 
 Player.prototype.update = function () {
