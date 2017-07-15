@@ -4,16 +4,13 @@ let gameAdjustmentVariables = {
 
     numberOfEnemies: 5,
     enemyImage: "images/enemy-bug.png",
-    // enemyStartPositionX: randomEnemyXStartValue(),
-    // enemyStartPositionY: randomEnemyYStartValue(),
+
     enemySpeed: 150,
 
     playerStartPositionX: 203,
     playerStartPositionY: 405,
     playerImage: "images/char-boy.png",
 
-    gameObjectWidth: 70,
-    gameObjectHeight: 50
 };
 
 //GameMechanics defines game events, updates and creates game objects
@@ -22,6 +19,8 @@ let GameMechanics = function(x, y, imageLocation) {
     this.x = x;
     this.y = y;
     this.sprite = imageLocation;
+    this.width = 70;
+    this.height = 50;
 };
 //Am i using the preloaded image from engine correctly here?
 GameMechanics.prototype.render = function () {
@@ -30,25 +29,13 @@ GameMechanics.prototype.render = function () {
 
 };
 
-GameMechanics.prototype.objectsAreColliding = function (obj1, obj2) {
+GameMechanics.prototype.objectsAreColliding = function (obj1) {
 
-    return (obj1.x < obj2.x + obj2.width &&
-        obj1.x + obj1.width > obj2.x &&
-        obj1.y < obj2.y + obj2.height &&
-        obj1.height + obj1.y > obj2.y)
+    return (obj1.x < this.x + this.width &&
+        obj1.x + obj1.width > this.x &&
+        obj1.y < this.y + this.height &&
+        obj1.height + obj1.y > this.y)
     };
-
-GameMechanics.prototype.getPosition = function(obj) {
-
-    let objectPosition = {
-        x: obj.x,
-        y: obj.y,
-        width: gameAdjustmentVariables.gameObjectWidth,
-        height: gameAdjustmentVariables.gameObjectHeight
-    };
-
-    return objectPosition;
-};
 
 GameMechanics.prototype.getRandomCol = function () {
 
@@ -145,7 +132,6 @@ Enemy.prototype.enemyFactory = function(numberOfEnemies) {
 Enemy.prototype.update = function (dt) {
 
     this.moveEnemies(dt);
-
 };
 
 Enemy.prototype.moveEnemies = function (dt) {
@@ -182,12 +168,9 @@ Enemy.prototype.despawnEnemy = function (allEnemies) {
 
 };
 
-Enemy.prototype.hasCollisionWithPlayer = function (playerPosition) {
+Enemy.prototype.hasCollisionWithPlayer = function (player) {
 
-    let enemyPosition = GameMechanics.prototype.getPosition(this);
-    let playerCollidesWithEnemy = GameMechanics.prototype.objectsAreColliding(playerPosition, enemyPosition);
-
-    if(playerCollidesWithEnemy) {
+    if(this.objectsAreColliding(player)) {
 
         player.loseLife();
         player.moveToStartPosition();
