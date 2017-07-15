@@ -157,6 +157,15 @@ Player.prototype.render = function () {
 
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     this.lifeBar();
+
+    //Question for reviewer: I want to write some text and despawn enemies when player wins. Is it correct to put that
+    //the checkForPlayerWin in the render method? Or should it be put in update method?
+    // Or should the method be split up so that despawn goes into update and the rendering part goes here?
+
+    this.checkForPlayerWin();
+    this.checkForPlayerDeath();
+
+
 };
 
 Player.prototype.moveToStartPosition = function () {
@@ -170,15 +179,14 @@ Player.prototype.moveToStartPosition = function () {
 
 Player.prototype.update = function () {
 
-    this.checkForPlayerWin();
-    this.checkForPlayerDeath();
+
 };
 
 Player.prototype.checkForPlayerWin = function () {
 
-    const waterVerticalPosition = 72;
+    const WATER_VERTICAL_POSITION = 72;
     let playerVerticalPosition = this.y;
-    let playerWins = (playerVerticalPosition < waterVerticalPosition);
+    let playerWins = (playerVerticalPosition < WATER_VERTICAL_POSITION);
 
     if(playerWins) {
 
@@ -186,7 +194,16 @@ Player.prototype.checkForPlayerWin = function () {
         allEnemies.forEach(function(enemy) {
             enemy.x = -100;
             enemy.speed = 0;
+
         });
+
+        ctx.font = "50px Arial";
+        ctx.textAlign="center";
+        ctx.fillText("Player wins!",252,303);
+
+        //Question for reviewer: I want to terminate the game here, or call the reset function in engine.
+        // Do i just make engine a global object and call it with Engine.reset()?
+
     }
 };
 
@@ -194,6 +211,10 @@ Player.prototype.checkForPlayerDeath = function () {
 
     if(this.life < 1) {
         this.x = -100;
+
+        ctx.font = "50px Arial";
+        ctx.textAlign="center";
+        ctx.fillText("Game Over!",252,303);
     }
 };
 
