@@ -37,38 +37,6 @@ GameMechanics.prototype.objectsAreColliding = function (obj1) {
         obj1.height + obj1.y > this.y)
     };
 
-GameMechanics.prototype.getRandomCol = function () {
-
-    let startInColumn1 = 0,
-        startInColumn2 = 101,
-        startInColumn3 = 202,
-        startInColumn4 = 303,
-        startInColumn5 = 404,
-        startInColumn6 = 505,
-        startInColumn7 = 606;
-    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
-        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
-    ];
-    let randomStartColumn = Math.floor(Math.random() * 7);
-    let randomCol = horizontalEnemyStartPositions[randomStartColumn];
-
-    return randomCol;
-};
-
-GameMechanics.prototype.getRandomRow = function() {
-
-    let startInUpperRow = 59,
-        startInMiddleRow = 142,
-        startInLowerRow = 225;
-    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
-        startInLowerRow
-    ];
-    let randomStartRow = Math.floor(Math.random() * 3);
-    let randomRow = verticalEnemyStartPositions[randomStartRow];
-
-    return randomRow;
-};
-
 GameMechanics.prototype.getRandomSpeed = function () {
 
     return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
@@ -154,8 +122,8 @@ Enemy.prototype.respawnEnemy = function (enemy) {
 
     if(enemy.isActive) {
         enemy.x = startPosition;
-        enemy.y = GameMechanics.prototype.getRandomRow();
-        enemy.speed = GameMechanics.prototype.getRandomSpeed();
+        enemy.y = this.getRandomRow();
+        enemy.speed = this.getRandomSpeed();
     }
 };
 
@@ -176,6 +144,39 @@ Enemy.prototype.hasCollisionWithPlayer = function (player) {
         player.moveToStartPosition();
     }
 };
+
+Enemy.prototype.getRandomCol = function () {
+
+    let startInColumn1 = 0,
+        startInColumn2 = 101,
+        startInColumn3 = 202,
+        startInColumn4 = 303,
+        startInColumn5 = 404,
+        startInColumn6 = 505,
+        startInColumn7 = 606;
+    let horizontalEnemyStartPositions = [startInColumn1, startInColumn2,
+        startInColumn3, startInColumn4, startInColumn5, startInColumn6, startInColumn7
+    ];
+    let randomStartColumn = Math.floor(Math.random() * 7);
+    let randomCol = horizontalEnemyStartPositions[randomStartColumn];
+
+    return randomCol;
+};
+
+Enemy.prototype.getRandomRow = function() {
+
+    let startInUpperRow = 59,
+        startInMiddleRow = 142,
+        startInLowerRow = 225;
+    let verticalEnemyStartPositions = [startInUpperRow, startInMiddleRow,
+        startInLowerRow
+    ];
+    let randomStartRow = Math.floor(Math.random() * 3);
+    let randomRow = verticalEnemyStartPositions[randomStartRow];
+
+    return randomRow;
+};
+
 
 let Player = function (x, y, imageLocation, life) {
 
