@@ -9,7 +9,8 @@ let gameAdjustmentVariables = {
 
     playerStartPositionX: 203,
     playerStartPositionY: 405,
-    playerImage: "images/char-boy.png"
+    playerImage: "images/char-boy.png",
+    playerLifes: 3
 
 };
 
@@ -22,11 +23,10 @@ let GameMechanics = function(x, y, imageLocation) {
     this.width = 70;
     this.height = 50;
 };
-//Am i using the preloaded image from engine correctly here?
+
 GameMechanics.prototype.render = function () {
 
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-
 };
 
 GameMechanics.prototype.objectsAreColliding = function (obj1) {
@@ -37,63 +37,23 @@ GameMechanics.prototype.objectsAreColliding = function (obj1) {
         obj1.height + obj1.y > this.y)
     };
 
-// GameMechanics.prototype.getRandomSpeed = function () {
-//
-//     return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
-// };
+let Enemy = function () {
 
-// GameMechanics.prototype.checkForPlayerWin = function (player) {
-//
-//     let playerVerticalPosition = player.y;
-//     let winConditionPlayerReachesWater = 72;
-//
-//     if(playerVerticalPosition < winConditionPlayerReachesWater) {
-//
-//         this.playerWins();
-//     }
-// };
+//Question for reviewer: Is it okay to use a constructor like i do here? Or should the values below be
+// provided as input to constructor?
+    let enemyStartCol = this.getRandomCol();
+    let enemyStartRow = this.getRandomRow();
+    let enemyImage = gameAdjustmentVariables.enemyImage;
 
-// GameMechanics.prototype.playerWins = function () {
-//
-//     //QUESTION FOR REVIEWER: Is it "okay" to pass in allEnemies from global scope to despawnEnemy?
-//     //Is it okay to use enemy or player methods in gamemechanics like this? (Or player methods in enemy methods etc.)
-//     Enemy.prototype.despawnEnemy(allEnemies);
-//
-// };
-
-GameMechanics.prototype.playerLoses = function (player) {
-
-    player.x = 1000;
-};
-
-let Enemy = function (x, y, imageLocation, speed) {
-
-    GameMechanics.call(this, x, y, imageLocation);
+    GameMechanics.call(this, enemyStartCol, enemyStartRow, enemyImage);
 
     this.isActive = true;
-    this.speed = speed;
+    this.speed = this.getRandomSpeed();
 };
 
 Enemy.prototype = Object.create(GameMechanics.prototype);
 
 Enemy.prototype.constructor = Enemy;
-
-Enemy.prototype.enemyFactory = function(numberOfEnemies) {
-
-    let enemyContainer = [];
-    for (let i = 0; i < numberOfEnemies; i++) {
-
-        //QUESTION FOR REVIEWER: How can i load the image from the Resource object as the third parameter in newEnemy?
-        // Resources.get('images/enemy-bug.png') doesn't work, why? This is inside a prototype method, so image should be done
-        //loading when it executes?
-
-        let newEnemy = new Enemy(this.getRandomCol(), this.getRandomRow(), "images/enemy-bug.png",
-            this.getRandomSpeed());
-        enemyContainer.push(newEnemy);
-    }
-
-    return enemyContainer;
-};
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -131,7 +91,7 @@ Enemy.prototype.hasCollisionWithPlayer = function (player) {
 
     if(this.objectsAreColliding(player)) {
 
-        player.loseLife();
+        player.life--;
         player.moveToStartPosition();
     }
 };
@@ -181,10 +141,18 @@ Enemy.prototype.getRandomSpeed = function () {
 };
 
 
-let Player = function (x, y, imageLocation, life) {
+let Player = function () {
 
-    GameMechanics.call(this, x, y, imageLocation);
-    this.life = life;
+    //Question for reviewer: Should i be doing this in the constructor (pass in nothing, and declare & use
+    //methods?)
+    let x = 0;
+    let y = 0;
+    let playerImage = gameAdjustmentVariables.playerImage;
+
+    GameMechanics.call(this, x, y, playerImage);
+
+    this.life = gameAdjustmentVariables.playerLifes;
+    this.moveToStartPosition();
 };
 
 Player.prototype = Object.create(GameMechanics.prototype);
@@ -206,9 +174,29 @@ Player.prototype.moveToStartPosition = function () {
 Player.prototype.update = function () {
 
     this.checkForPlayerWin();
+    this.checkForPlayerDeath();
+};
+
+Player.prototype.checkForPlayerWin = function () {
+
+    const waterVerticalPosition = 72;
+    let playerVerticalPosition = this.y;
+    let playerWins = (playerVerticalPosition < waterVerticalPosition);
+
+    if(playerWins) {
+
+        //move all enemies outside of canvas and set speed to 0
+        allEnemies.forEach(function(enemy) {
+            enemy.x = -100;
+            enemy.speed = 0;
+        });
+    }
+};
+
+Player.prototype.checkForPlayerDeath = function () {
 
     if(this.life < 1) {
-        GameMechanics.prototype.playerLoses(this);
+        this.x = -100;
     }
 };
 
@@ -217,19 +205,12 @@ Player.prototype.lifeBar = function() {
     let numberOfLives = this.life;
     let lifeImage = new Image();
 
-    lifeImage.src = Resources.get("images/Heart.png");
-
     lifeImage.src = "images/Heart.png";
 
     for(let i = 0; i < numberOfLives; i++) {
 
         ctx.drawImage(lifeImage, i * 30, 540, 30, 50);
     }
-};
-
-Player.prototype.loseLife = function() {
-
-    return this.life--;
 };
 
 Player.prototype.handleInput = function (keyInput) {
@@ -273,30 +254,18 @@ Player.prototype.handleInput = function (keyInput) {
     }
 };
 
-Player.prototype.checkForPlayerWin = function () {
-
-    const waterVerticalPosition = 72;
-    let playerVerticalPosition = this.y;
-    let playerWins = (playerVerticalPosition < waterVerticalPosition);
-
-    if(playerWins) {
-
-        //move all enemies outside of canvas and set speed to 0
-        allEnemies.forEach(function(enemy) {
-            enemy.x = -100;
-            enemy.speed = 0;
-        });
-    }
-};
-
 //instantiate objects
-
-let allEnemies = new Enemy();
+//create enemies
+let allEnemies = [];
 let numberOfEnemies = gameAdjustmentVariables.numberOfEnemies;
-allEnemies = allEnemies.enemyFactory(numberOfEnemies);
-let player = new Player(gameAdjustmentVariables.playerStartPositionX, gameAdjustmentVariables.playerStartPositionY,
-    gameAdjustmentVariables.playerImage, 3);
+for (let i = 0; i < numberOfEnemies; i++) {
 
+    let newEnemy = new Enemy();
+    allEnemies.push(newEnemy);
+}
+
+//create player
+let player = new Player();
 
 document.addEventListener('keyup', function (e) {
     let allowedKeys = {
