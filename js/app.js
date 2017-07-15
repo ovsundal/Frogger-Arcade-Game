@@ -42,24 +42,24 @@ GameMechanics.prototype.objectsAreColliding = function (obj1) {
 //     return 150 + Math.random() * gameAdjustmentVariables.enemySpeed;
 // };
 
-GameMechanics.prototype.checkForPlayerWin = function (player) {
+// GameMechanics.prototype.checkForPlayerWin = function (player) {
+//
+//     let playerVerticalPosition = player.y;
+//     let winConditionPlayerReachesWater = 72;
+//
+//     if(playerVerticalPosition < winConditionPlayerReachesWater) {
+//
+//         this.playerWins();
+//     }
+// };
 
-    let playerVerticalPosition = player.y;
-    let winConditionPlayerReachesWater = 72;
-
-    if(playerVerticalPosition < winConditionPlayerReachesWater) {
-
-        this.playerWins();
-    }
-};
-
-GameMechanics.prototype.playerWins = function () {
-
-    //QUESTION FOR REVIEWER: Is it "okay" to pass in allEnemies from global scope to despawnEnemy?
-    //Is it okay to use enemy or player methods in gamemechanics like this? (Or player methods in enemy methods etc.)
-    Enemy.prototype.despawnEnemy(allEnemies);
-
-};
+// GameMechanics.prototype.playerWins = function () {
+//
+//     //QUESTION FOR REVIEWER: Is it "okay" to pass in allEnemies from global scope to despawnEnemy?
+//     //Is it okay to use enemy or player methods in gamemechanics like this? (Or player methods in enemy methods etc.)
+//     Enemy.prototype.despawnEnemy(allEnemies);
+//
+// };
 
 GameMechanics.prototype.playerLoses = function (player) {
 
@@ -125,15 +125,6 @@ Enemy.prototype.respawnEnemy = function (enemy) {
         enemy.y = this.getRandomRow();
         enemy.speed = this.getRandomSpeed();
     }
-};
-
-Enemy.prototype.despawnEnemy = function (allEnemies) {
-
-    allEnemies.forEach(function(enemy) {
-        enemy.x = -1000;
-        enemy.speed = 0;
-    });
-
 };
 
 Enemy.prototype.hasCollisionWithPlayer = function (player) {
@@ -214,7 +205,7 @@ Player.prototype.moveToStartPosition = function () {
 
 Player.prototype.update = function () {
 
-    Player.prototype.checkForPlayerWin(this);
+    this.checkForPlayerWin();
 
     if(this.life < 1) {
         GameMechanics.prototype.playerLoses(this);
@@ -279,6 +270,22 @@ Player.prototype.handleInput = function (keyInput) {
             break;
         }
 
+    }
+};
+
+Player.prototype.checkForPlayerWin = function () {
+
+    const waterVerticalPosition = 72;
+    let playerVerticalPosition = this.y;
+    let playerWins = (playerVerticalPosition < waterVerticalPosition);
+
+    if(playerWins) {
+
+        //move all enemies outside of canvas and set speed to 0
+        allEnemies.forEach(function(enemy) {
+            enemy.x = -100;
+            enemy.speed = 0;
+        });
     }
 };
 
