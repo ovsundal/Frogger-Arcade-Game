@@ -5,7 +5,7 @@ let gameAdjustmentVariables = {
     numberOfEnemies: 7,
     enemyImage: "images/enemy-bug.png",
 
-    playerLifes: 4,
+    playerLifes: 3,
     playerImage: "images/char-boy.png",
 
     gemImage: "images/Gem Blue.png"
@@ -26,7 +26,7 @@ GameMechanics.prototype.render = function () {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-GameMechanics.prototype.objectsAreColliding = function (obj1) {
+GameMechanics.prototype.checkCollision = function (obj1) {
 
     return (obj1.x < this.x + this.width &&
     obj1.x + obj1.width > this.x &&
@@ -65,8 +65,6 @@ GameMechanics.prototype.getRandomRow = function () {
 
 let Enemy = function () {
 
-//Question for reviewer: Is it okay to use a constructor like i do here? Or should the values below be
-// provided as input to constructor?
     let enemyStartCol = this.getRandomCol();
     let enemyStartRow = this.getRandomRow();
     let enemyImage = gameAdjustmentVariables.enemyImage;
@@ -83,7 +81,6 @@ Enemy.prototype.constructor = Enemy;
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function (dt) {
-
     this.moveEnemies(dt);
 };
 
@@ -103,9 +100,7 @@ Enemy.prototype.moveEnemies = function (dt) {
 // amount of time to reach canvas).
 Enemy.prototype.respawnEnemy = function () {
 
-    const startPosition = -250;
-
-    this.x = startPosition;
+    this.x = -250;
     this.y = this.getRandomRow();
     this.speed = this.getRandomSpeed();
 
@@ -113,10 +108,10 @@ Enemy.prototype.respawnEnemy = function () {
 
 GameMechanics.prototype.hasCollisionWithPlayer = function (player) {
 
-    if (this.objectsAreColliding(player)) {
+    if (this.checkCollision(player)) {
         //if player picks up gem
         if(this instanceof Gem) {
-            player.score += 10;
+            player.score += 20;
             this.move();
             //if player collides with enemy
         } else {
@@ -136,8 +131,6 @@ Enemy.prototype.getRandomSpeed = function () {
 
 let Player = function () {
 
-    //Question for reviewer: Should i be doing this in the constructor (pass in nothing, and declare & use
-    //methods?)
     let x = 0;
     let y = 0;
     let playerImage = gameAdjustmentVariables.playerImage;
@@ -156,17 +149,11 @@ Player.prototype.constructor = Player;
 Player.prototype.render = function () {
 
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    this.checkForPlayerWin();
     this.lifeBar();
     this.scoreBar();
 
-    //Question for reviewer: I want to write some text and despawn enemies when player wins. Is it correct to put that
-    //the checkForPlayerWin in the render method? Or should it be put in update method?
-    // Or should the method be split up so that despawn goes into update and the rendering part goes here?
-
-    this.checkForPlayerWin();
     this.checkForPlayerDeath();
-
-
 };
 
 Player.prototype.moveToStartPosition = function () {
@@ -179,8 +166,6 @@ Player.prototype.moveToStartPosition = function () {
 };
 
 Player.prototype.update = function () {
-
-
 };
 
 Player.prototype.checkForPlayerWin = function () {
@@ -190,6 +175,10 @@ Player.prototype.checkForPlayerWin = function () {
     let playerWins = (playerVerticalPosition < WATER_VERTICAL_POSITION);
 
     if (playerWins) {
+
+        //stop game engine
+        go = false;
+
 
         this.score += 50;
         //move all enemies outside of canvas and set speed to 0
@@ -210,25 +199,18 @@ Player.prototype.checkForPlayerWin = function () {
             ctx.fillText(message[i], 252, yValue);
             yValue += 50;
         }
-        //Question for reviewer: I want to terminate the game here (while still showing the screen), or call the reset
-        // function in engine. Do i just make engine a global object and call it with Engine.reset()? If i don't do
-        //anything the game is just gonna keep on increasing player score
-
-        //i'm sure this is not the way to do it, but i'm clueless as to how i can stop the script
-        throw "";
     }
 };
 
 Player.prototype.checkForPlayerDeath = function () {
 
     if (this.life < 1) {
-        this.x = -100;
 
+        go = false;
+        this.x = -100;
         ctx.font = "50px Arial";
         ctx.textAlign = "center";
         ctx.fillText("Game Over!", 252, 303);
-
-        throw "";
     }
 };
 
@@ -239,11 +221,7 @@ Player.prototype.lifeBar = function () {
 
     lifeImage.src = "images/Heart.png";
 
-    //Why doesn't this work? It's inside a prototype method?
-    // lifeImage.src = Resources.get("images/Heart.png");
-
     for (let i = 0; i < numberOfLives; i++) {
-
         ctx.drawImage(lifeImage, i * 30, 540, 30, 50);
     }
 };
@@ -301,7 +279,6 @@ Player.prototype.collectGem = function () {
 
 }
 
-
 let Gem = function () {
 
     let gemPlacementCol = this.getRandomCol(),
@@ -319,7 +296,7 @@ Gem.prototype.move = function () {
 
     this.x = this.getRandomCol();
     this.y = this.getRandomRow();
-}
+};
 
 //instantiate objects
 //create enemies
