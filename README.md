@@ -5,7 +5,7 @@ This is my version of the classic Frogger game. The project is part of Udacitys 
 ---
 ### Starting the game:
 
-In the project folder, open "index.html" in a web browser. Alternatively, the game is uploaded and can be played here: https://ovsundal.github.io/frontend-nanodegree-arcade-game/
+In the project folder, open "index.html" in a web browser. Alternatively, the game is uploaded and can be played here: https://ovsundal.github.io/Frogger-Arcade-Game/
 
 ### Navigating the game:
 
